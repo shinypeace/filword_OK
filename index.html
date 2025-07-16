@@ -111,9 +111,7 @@
     <div id="pause-modal" class="modal-overlay"><div class="modal-content"><h2>Пауза</h2><div class="modal-buttons"><button id="resume-button" class="modal-button">Продолжить</button><button id="pause-menu-button" class="modal-button secondary">Выйти в меню</button></div></div></div>
     <div id="rules-modal" class="modal-overlay"><div class="modal-content"><h2>Правила игры</h2><p>Найдите все слова, спрятанные в сетке. Слова могут изгибаться в любом направлении, но не пересекаются.</p><p>Чтобы выделить слово, проведите пальцем или мышью по буквам от начала до конца.</p><div class="rules-illustration"><div class="illustration-grid"><div class="illustration-cell">А</div><div class="illustration-cell highlighted">К</div><div class="illustration-cell">Б</div><div class="illustration-cell">В</div><div class="illustration-cell highlighted">О</div><div class="illustration-cell">Г</div><div class="illustration-cell">Д</div><div class="illustration-cell highlighted">Т</div><div class="illustration-cell">Е</div></div></div><div class="modal-buttons"><button id="close-rules-button" class="modal-button">Понятно</button></div></div></div>
 
-
-  <script>
-    // --- OK SDK: Обертка для асинхронной инициализации ---
+    <script>
     function initOKSDK() {
         return new Promise((resolve) => {
             const onOdnoklassnikiLoaded = () => {
@@ -123,16 +121,14 @@
                     resolve(params);
                 }, (error) => {
                     console.error('OK SDK init error:', error);
-                    resolve(null); // Решаем промис даже при ошибке, чтобы игра запустилась
+                    resolve(null);
                 });
             };
-            // Добавляем обработчик в глобальную область видимости
             window.OK_API_init_success = onOdnoklassnikiLoaded;
         });
     }
 
     window.addEventListener('load', async () => {
-        // --- ПЕРЕМЕННЫЕ ---
         let FAPI_PARAMS = null;
         let levelsPlayedSinceAd = 0;
         const LEVELS_TO_UNLOCK = 30;
@@ -280,23 +276,31 @@
         const state = { gridSize: 0, words: [], wordCellCoords: new Map(), grid: [], foundWords: [], isSelecting: false, selectedCells: [], hintedWord: null, hintedLetterIndex: 0, };
         const dom = { mainMenu: document.getElementById('main-menu'), gameScreen: document.getElementById('game-screen'), gridContainer: document.getElementById('grid-container'), levelDisplay: document.getElementById('level-display'), themeToggle: document.getElementById('theme-toggle'), winModal: document.getElementById('win-modal'), pauseModal: document.getElementById('pause-modal'), rulesModal: document.getElementById('rules-modal'), pauseButton: document.getElementById('pause-button'), hintButton: document.getElementById('hint-button'), nextLevelButton: document.getElementById('next-level-button'), resumeButton: document.getElementById('resume-button'), winMenuButton: document.getElementById('win-menu-button'), pauseMenuButton: document.getElementById('pause-menu-button'), rulesButton: document.getElementById('rules-button'), closeRulesButton: document.getElementById('close-rules-button'), };
 
-        // --- ЛОГИКА ИНТЕГРАЦИИ OK SDK ---
         async function saveGameData() {
-            if (!FAPI) return;
+            if (!FAPI_PARAMS) return localStorage.setItem('fillwords_guest_save', JSON.stringify(gameState));
             const dataToSave = JSON.stringify(gameState);
             FAPI.Client.setVars('fillwords_save', dataToSave);
         }
 
         function loadGameData() {
             return new Promise((resolve) => {
-                if (!FAPI) { resolve(); return; }
-                FAPI.Client.getVars('fillwords_save', (status, data) => {
-                    if (status === 'ok' && data && data.length > 0) {
+                if (!FAPI_PARAMS) {
+                    const guestData = localStorage.getItem('fillwords_guest_save');
+                    if (guestData) gameState = JSON.parse(guestData);
+                    resolve();
+                    return;
+                }
+                FAPI.Client.getVars('fillwords_save', (status, data, error) => {
+                    if (status === 'ok' && data) {
                         try {
-                            const loadedData = JSON.parse(data[0].value);
-                            gameState.theme = loadedData.theme || 'light';
-                            gameState.levels = { ...gameState.levels, ...loadedData.levels };
+                            const loadedData = JSON.parse(data);
+                            if (loadedData) {
+                                gameState.theme = loadedData.theme || 'light';
+                                gameState.levels = { ...gameState.levels, ...loadedData.levels };
+                            }
                         } catch(e) { console.error('Error parsing save data', e); }
+                    } else {
+                        console.error('OK GetVars Error:', error);
                     }
                     resolve();
                 });
@@ -311,7 +315,6 @@
                 levelsPlayedSinceAd = 0;
             }
         }
-
         
         function initGameUI() {
             document.body.dataset.theme = gameState.theme;
@@ -427,7 +430,7 @@
         const updateSelectionLook = () => { document.querySelectorAll('.grid-cell.selected').forEach(c => c.classList.remove('selected')); state.selectedCells.forEach(({r, c}) => { const cellEl = document.querySelector(`.grid-cell[data-r='${r}'][data-c='${c}']`); if(cellEl) cellEl.classList.add('selected'); }); };
         function markWordAsFound(word) { const colorIndex = (state.foundWords.length - 1) % foundColors.length; const color = foundColors[colorIndex]; const coords = state.wordCellCoords.get(word); coords.forEach(({r, c}) => { const cellEl = document.querySelector(`.grid-cell[data-r='${r}'][data-c='${c}']`); if (cellEl) { cellEl.classList.add('found'); cellEl.style.backgroundColor = color.bg; cellEl.style.color = '#ffffff'; } }); }
         
-function showToast(message) {
+        function showToast(message) {
             const toast = document.createElement('div');
             toast.className = 'toast-notification';
             toast.textContent = message;
@@ -438,19 +441,13 @@ function showToast(message) {
 
         function handleHintClick() {
             if (!FAPI) return showToast('Ошибка: SDK не загружен');
-            // Устанавливаем обработчик результата *перед* показом рекламы
             FAPI.addCallback('sdk.showExtAdResult', (status) => {
-                if (status === 'ok') {
-                    grantHint();
-                } else {
-                    showToast('Просмотрите рекламу до конца');
-                }
-                // Удаляем обработчик, чтобы он не сработал повторно
+                if (status === 'ok') { grantHint(); } 
+                else { showToast('Просмотрите рекламу до конца'); }
                 FAPI.removeCallback('sdk.showExtAdResult');
             });
             FAPI.UI.showLoadedExtAd();
         }
-
         function grantHint() {
             if (!state.hintedWord) {
                 const unfoundWords = state.words.filter(w => !state.foundWords.includes(w));
@@ -472,10 +469,12 @@ function showToast(message) {
         const clearHint = () => { state.hintedWord = null; state.hintedLetterIndex = 0; document.querySelectorAll('.grid-cell.hint').forEach(cell => cell.classList.remove('hint')); };
 
         // --- ПЕРВЫЙ ЗАПУСК ---
-        FAPI_PARAMS = await initOKSDK();
-        await loadGameData();
-        initGameUI();
-
+        initOKSDK().then(params => {
+            FAPI_PARAMS = params;
+            loadGameData().then(() => {
+                initGameUI();
+            });
+        });
     });
     </script>
 </body>
