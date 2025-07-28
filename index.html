@@ -2,479 +2,844 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Филворды</title>
-    <script type="text/javascript">
-        var api_file = document.createElement('script');
-        api_file.src = 'https://api.ok.ru/js/fapi.js';
-        document.head.appendChild(api_file);
-    </script>
-    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Матрица Математики 4.0</title>
+    <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap" rel="stylesheet">
     <style>
         :root {
-            --font-main: 'Manrope', sans-serif;
-            --transition-speed: 0.3s;
-            --transition-fast: 0.15s;
-            --banner-height: 50px;
-            --bg-light: #f5f6fa; --text-light: #4a4a4a; --card-light: #ffffff; --accent-light: #4870ff; --accent-hover-light: #3a59c9; --grid-border-light: #e1e4e8; --selected-light: #dbe4ff; --shadow-light: 0 8px 30px rgba(60, 70, 80, 0.12); --hint-color-light: var(--accent-light);
-            --bg-dark: #1d1d1d; --text-dark: #e1e1e1; --card-dark: #2a2a2a; --accent-dark: #5d8aff; --accent-hover-dark: #7d9fff; --grid-border-dark: #3a3a3a; --selected-dark: #313b52; --shadow-dark: 0 8px 30px rgba(0, 0, 0, 0.2); --hint-color-dark: var(--accent-dark);
+            --bg-primary: #111827; /* gray-900 */
+            --bg-secondary: #1f2937; /* gray-800 */
+            --bg-tertiary: #374151; /* gray-700 */
+            --bg-interactive: #0ea5e9; /* sky-500 */
+            --bg-interactive-hover: #0284c7; /* sky-600 */
+            --text-primary: #ffffff;
+            --text-secondary: #9ca3af; /* gray-400 */
+            --text-accent: #38bdf8; /* sky-400 */
+            --modal-backdrop: rgba(0,0,0,0.7);
+            --btn-restart-bg: var(--bg-tertiary);
+            --btn-restart-text: var(--text-primary);
+            --hint-color: #facc15; /* yellow-400 */
         }
-        html { height: 100%; }
+        
+        html.light {
+            --bg-primary: #f3f4f6; /* gray-100 */
+            --bg-secondary: #ffffff;
+            --bg-tertiary: #e5e7eb; /* gray-200 */
+            --bg-interactive: #3b82f6; /* blue-500 */
+            --bg-interactive-hover: #2563eb; /* blue-600 */
+            --text-primary: #1f2937; /* gray-800 */
+            --text-secondary: #6b7280; /* gray-500 */
+            --text-accent: #3b82f6; /* blue-500 */
+            --modal-backdrop: rgba(243, 244, 246, 0.7);
+            --btn-restart-bg: #d1d5db; /* gray-300 */
+            --btn-restart-text: #1f2937; /* gray-800 */
+        }
+
         body {
-            font-family: var(--font-main); margin: 0; padding: 0; box-sizing: border-box;
-            background-color: var(--bg-color); color: var(--text-color);
-            transition: background-color var(--transition-speed), color var(--transition-speed);
-            overflow: hidden; user-select: none; -webkit-user-select: none;
-            touch-action: none; -webkit-tap-highlight-color: transparent; height: 100%;
-            padding-bottom: var(--banner-height);
+            font-family: 'Inter', sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            touch-action: manipulation;
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            transition: background-color 0.3s, color 0.3s;
         }
-        body[data-theme='light'] { --bg-color: var(--bg-light); --text-color: var(--text-light); --card-color: var(--card-light); --accent-color: var(--accent-light); --accent-hover-color: var(--accent-hover-light); --grid-border-color: var(--grid-border-light); --selected-color: var(--selected-light); --text-selected-color: #2c3e50; --box-shadow: var(--shadow-light); --hint-color: var(--hint-color-light); }
-        body[data-theme='dark'] { --bg-color: var(--bg-dark); --text-color: var(--text-dark); --card-color: var(--card-dark); --accent-color: var(--accent-dark); --accent-hover-color: var(--accent-hover-dark); --grid-border-color: var(--grid-border-dark); --selected-color: var(--selected-dark); --text-selected-color: #e1e1e1; --box-shadow: var(--shadow-dark); --hint-color: var(--hint-color-dark); }
-        .screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; padding: 1rem; box-sizing: border-box; opacity: 0; transform: scale(0.98); transition: opacity var(--transition-speed) ease, transform var(--transition-speed) ease; pointer-events: none; }
-        .screen.active { opacity: 1; transform: scale(1); pointer-events: auto; }
-        #main-menu { justify-content: center; gap: 4vh; padding-top: 1rem; padding-bottom: 1rem; overflow-y: auto; }
-        #main-menu .title { font-size: clamp(2.2rem, 9vh, 4rem); font-weight: 800; color: var(--accent-color); margin: 0; line-height: 1; flex-shrink: 0; }
-        .menu-grid { display: grid; grid-template-columns: 1fr; gap: clamp(0.5rem, 2vh, 1rem); width: 100%; max-width: 320px; flex-shrink: 0; }
-        .menu-button { position: relative; background-color: var(--card-color); color: var(--text-color); border: none; border-radius: 16px; padding: clamp(0.7rem, 2.5vh, 1.2rem) 1rem; font-size: clamp(1.2rem, 4vh, 1.5rem); font-weight: 700; cursor: pointer; transition: all var(--transition-speed); box-shadow: var(--box-shadow); text-align: center; overflow: hidden; }
-        .menu-button:not(:disabled):hover { transform: translateY(-6px); box-shadow: 0 12px 35px rgba(60, 70, 80, 0.15); }
-        body[data-theme='dark'] .menu-button:not(:disabled):hover { box-shadow: 0 12px 35px rgba(0, 0, 0, 0.25); }
-        .menu-button:disabled { cursor: not-allowed; opacity: 0.6; }
-        .menu-button .level-info { font-size: clamp(0.7rem, 1.5vh, 0.9rem); font-weight: 400; opacity: 0.6; margin-top: 5px; }
-        .lock-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.3); display: flex; flex-direction: column; align-items: center; justify-content: center; color: white; backdrop-filter: blur(2px); opacity: 0; pointer-events: none; transition: opacity var(--transition-speed); }
-        .menu-button.locked .lock-overlay { opacity: 1; }
-        .lock-icon { font-size: 2rem; }
-        .unlock-progress { font-size: 0.9rem; font-weight: 600; margin-top: 0.5rem; }
-        .bottom-buttons-container { display: flex; gap: 1rem; margin-top: 1rem; flex-shrink: 0; }
-        .bottom-button { background-color: var(--card-color); border: 1px solid var(--grid-border-color); color: var(--text-color); padding: 0.8rem 1.5rem; border-radius: 12px; font-size: 1rem; font-weight: 600; cursor: pointer; transition: all var(--transition-speed); }
-        .bottom-button:hover { transform: translateY(-3px); box-shadow: var(--box-shadow); }
-        #game-screen { justify-content: flex-start; padding-top: 2rem; }
-        .grid-wrapper { flex-grow: 1; width: 100%; display: flex; align-items: center; justify-content: center; }
-        .game-header { width: 100%; max-width: 500px; display: flex; justify-content: space-between; align-items: center; padding: 0 5px; margin-bottom: 1rem; }
-        .game-header-button { background-color: var(--card-color); border: 1px solid var(--grid-border-color); color: var(--text-color); padding: 0.6rem 1.2rem; border-radius: 10px; font-size: 1rem; font-weight: 600; cursor: pointer; transition: all var(--transition-speed); display: flex; align-items: center; gap: 0.5rem; }
-        .game-header-button:hover { transform: translateY(-3px); box-shadow: var(--box-shadow); border-color: var(--accent-color); }
-        .game-header-button:disabled { opacity: 0.5; cursor: not-allowed; }
-        .level-display { font-size: 1.5rem; font-weight: 700; color: var(--accent-color); }
-        #grid-container { display: grid; gap: 6px; width: 90vw; max-width: 500px; user-select: none; }
-        .grid-cell { aspect-ratio: 1 / 1; display: flex; align-items: center; justify-content: center; background-color: var(--card-color); border: 1px solid transparent; border-radius: 12px; font-size: clamp(1rem, 5vw, 2rem); font-weight: 700; text-transform: uppercase; color: var(--text-color); transition: all var(--transition-fast); cursor: pointer; }
-        .grid-cell.selected { background-color: var(--selected-color); color: var(--text-selected-color); transform: scale(0.9); border-color: var(--accent-color); }
-        .grid-cell.found { color: #fff; box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.4); }
-        .grid-cell.hint { animation: hint-pulse 1s ease-in-out; }
-        @keyframes hint-pulse { 0% { box-shadow: inset 0 0 0 0px var(--hint-color); } 50% { box-shadow: inset 0 0 0 4px var(--hint-color); } 100% { box-shadow: inset 0 0 0 0px var(--hint-color); } }
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.6); backdrop-filter: blur(5px); display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity var(--transition-speed); z-index: 1000; }
-        .modal-overlay.active { opacity: 1; pointer-events: auto; }
-        .modal-content { background-color: var(--card-color); padding: 2rem; border-radius: 20px; text-align: center; box-shadow: var(--box-shadow); transform: scale(0.8); transition: transform var(--transition-speed) ease-out; width: 90%; max-width: 380px; }
-        .modal-overlay.active .modal-content { transform: scale(1); }
-        .modal-content h2 { font-size: 2.2rem; font-weight: 800; color: var(--accent-color); margin-top: 0; margin-bottom: 0.5rem; }
-        .modal-content p { font-size: 1.1rem; margin-bottom: 1.5rem; opacity: 0.8; line-height: 1.5; text-align: left;}
-        .modal-buttons { display: flex; flex-direction: column; gap: 0.8rem; }
-        .modal-button { background-color: var(--accent-color); color: white; border: none; border-radius: 12px; padding: 1rem; font-size: 1.1rem; font-weight: 700; cursor: pointer; transition: all var(--transition-speed); width: 100%; }
-        .modal-button:hover { background-color: var(--accent-hover-color); transform: scale(1.05); }
-        .modal-button.secondary { background-color: transparent; color: var(--accent-color); border: 2px solid var(--grid-border-color); }
-        .modal-button.secondary:hover { background-color: var(--grid-border-color); }
-        .rules-illustration { display: flex; justify-content: center; margin-bottom: 1.5rem; }
-        .illustration-grid { display: grid; grid-template-columns: repeat(3, 40px); gap: 4px; }
-        .illustration-cell { width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; background-color: var(--grid-border-color); border-radius: 8px; font-weight: 700; font-size: 1.5rem; }
-        .illustration-cell.highlighted { background-color: var(--accent-color); color: white; }
-        .toast-notification { position: fixed; bottom: 20%; left: 50%; transform: translateX(-50%); background-color: rgba(0, 0, 0, 0.7); color: white; padding: 12px 20px; border-radius: 25px; font-size: 1rem; font-weight: 600; z-index: 2000; opacity: 0; transition: opacity 0.4s ease, transform 0.4s ease; pointer-events: none; }
-        .toast-notification.show { opacity: 1; transform: translate(-50%, -20px); }
+        .screen {
+            display: none;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            animation: fadeIn 0.5s ease-in-out;
+            background-color: var(--bg-primary);
+        }
+        .screen.active {
+            display: flex;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.98); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        .tile {
+            transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s ease, background-color 0.2s;
+            will-change: transform;
+            background-color: var(--bg-secondary);
+            color: var(--text-primary);
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -2px rgba(0,0,0,0.1);
+        }
+        .tile.operator {
+             background-color: var(--bg-interactive);
+             color: white;
+        }
+        .tile.selected {
+            /* No more scaling */
+            box-shadow: 0 0 25px var(--text-accent);
+            z-index: 10;
+        }
+        .tile.hint-outline {
+            box-shadow: 0 0 0 4px var(--hint-color);
+            z-index: 20;
+        }
+        .modal-backdrop {
+            background-color: var(--modal-backdrop);
+            backdrop-filter: blur(5px);
+        }
+        .path-line {
+            position: absolute;
+            background-color: var(--text-accent);
+            opacity: 0.7;
+            height: 5px;
+            border-radius: 3px;
+            transform-origin: left center;
+            pointer-events: none;
+            z-index: 5;
+        }
+        .theme-switcher {
+            appearance: none; width: 50px; height: 28px; background-color: #4b5563;
+            border-radius: 9999px; position: relative; cursor: pointer; transition: background-color 0.3s;
+        }
+        .theme-switcher:before {
+            content: ''; position: absolute; width: 22px; height: 22px; border-radius: 50%;
+            background-color: white; top: 3px; left: 3px; transition: transform 0.3s;
+        }
+        .theme-switcher:checked { background-color: #3b82f6; }
+        .theme-switcher:checked:before { transform: translateX(22px); }
+        .btn-restart {
+             background-color: var(--btn-restart-bg);
+             color: var(--btn-restart-text);
+        }
+        .rules-illustration .tile { font-size: 1.25rem; }
+        .menu-btn {
+            transition-property: background-color, border-color, transform, box-shadow;
+            transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+            transition-duration: 300ms;
+        }
     </style>
 </head>
-<body>
-    <div id="ok_api_transport"></div>
-    <div id="app-container">
-        <div id="main-menu" class="screen active">
-            <h1 class="title">Филворды</h1>
-            <div class="menu-grid">
-                <button class="menu-button" data-size="5">5 x 5<div class="level-info" id="level-info-5"></div></button>
-                <button class="menu-button" data-size="6"><div class="button-content">6 x 6<div class="level-info" id="level-info-6"></div></div><div class="lock-overlay"><span class="lock-icon">🔒</span><span class="unlock-progress" id="unlock-progress-6"></span></div></button>
-                <button class="menu-button" data-size="7"><div class="button-content">7 x 7<div class="level-info" id="level-info-7"></div></div><div class="lock-overlay"><span class="lock-icon">🔒</span><span class="unlock-progress" id="unlock-progress-7"></span></div></button>
-                <button class="menu-button" data-size="8"><div class="button-content">8 x 8<div class="level-info" id="level-info-8"></div></div><div class="lock-overlay"><span class="lock-icon">🔒</span><span class="unlock-progress" id="unlock-progress-8"></span></div></button>
-            </div>
-            <div class="bottom-buttons-container">
-                <button id="rules-button" class="bottom-button">Правила</button>
-                <button id="theme-toggle" class="bottom-button">Сменить тему</button>
-            </div>
+<body class="overflow-hidden select-none">
+
+    <!-- Main Menu Screen -->
+    <div id="main-menu" class="screen active flex-col items-center justify-center p-8 space-y-8">
+        <div class="text-center">
+            <h1 class="text-5xl md:text-6xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-sky-400 to-fuchsia-500">Матрица</h1>
+            <h2 class="text-5xl md:text-6xl font-black tracking-tighter" style="color: var(--text-primary);">Математики</h2>
         </div>
-        <div id="game-screen" class="screen">
-            <div class="game-header">
-                <button class="game-header-button" id="pause-button">❚❚</button>
-                <div id="level-display" class="level-display"></div>
-                <button class="game-header-button" id="hint-button">💡 ▶️</button>
+        
+        <div id="difficulty-selection" class="grid grid-cols-2 gap-4 w-full max-w-sm">
+            <!-- Buttons are generated by JS -->
+        </div>
+
+        <div class="flex flex-col space-y-4 w-full max-w-sm">
+             <button id="stats-button" class="w-full font-bold py-3 px-4 rounded-xl text-lg shadow-md transform hover:scale-105 menu-btn" style="background-color: var(--bg-tertiary); color: var(--text-primary);">
+                Статистика
+            </button>
+            <div class="flex items-center justify-between p-3 rounded-xl" style="background-color: var(--bg-tertiary);">
+                <span class="font-medium" style="color: var(--text-secondary);">Светлая тема</span>
+                <input type="checkbox" id="theme-switch" class="theme-switcher">
             </div>
-            <div class="grid-wrapper"><div id="grid-container"></div></div>
         </div>
     </div>
-    <div id="win-modal" class="modal-overlay"><div class="modal-content"><h2>Отлично!</h2><p>Уровень пройден!</p><div class="modal-buttons"><button id="next-level-button" class="modal-button">Следующий</button><button id="win-menu-button" class="modal-button secondary">В меню</button></div></div></div>
-    <div id="pause-modal" class="modal-overlay"><div class="modal-content"><h2>Пауза</h2><div class="modal-buttons"><button id="resume-button" class="modal-button">Продолжить</button><button id="pause-menu-button" class="modal-button secondary">Выйти в меню</button></div></div></div>
-    <div id="rules-modal" class="modal-overlay"><div class="modal-content"><h2>Правила игры</h2><p>Найдите все слова, спрятанные в сетке. Слова могут изгибаться в любом направлении, но не пересекаются.</p><p>Чтобы выделить слово, проведите пальцем или мышью по буквам от начала до конца.</p><div class="rules-illustration"><div class="illustration-grid"><div class="illustration-cell">А</div><div class="illustration-cell highlighted">К</div><div class="illustration-cell">Б</div><div class="illustration-cell">В</div><div class="illustration-cell highlighted">О</div><div class="illustration-cell">Г</div><div class="illustration-cell">Д</div><div class="illustration-cell highlighted">Т</div><div class="illustration-cell">Е</div></div></div><div class="modal-buttons"><button id="close-rules-button" class="modal-button">Понятно</button></div></div></div>
+
+    <!-- Game Screen -->
+    <div id="game-screen" class="screen flex-col items-center justify-between p-4">
+        <!-- Header -->
+        <header class="w-full flex items-center justify-between p-2">
+            <div class="text-left">
+                <div class="text-sm" style="color: var(--text-secondary);">УРОВЕНЬ</div>
+                <div id="level-display" class="text-2xl font-bold">1</div>
+            </div>
+            <button id="pause-button" class="p-3 rounded-full transition" style="background-color: var(--bg-secondary);">
+                <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color: var(--text-primary);"><path d="M6 4h2v16H6zM16 4h2v16h-2z"/></svg>
+            </button>
+            <div class="text-right">
+                <div class="text-sm" style="color: var(--text-secondary);">ЦЕЛЬ</div>
+                <div id="target-display" class="text-2xl font-bold" style="color: var(--text-accent);">25</div>
+            </div>
+        </header>
+
+        <!-- Game Grid -->
+        <main id="grid-container" class="relative w-full max-w-md aspect-square flex items-center justify-center">
+            <div id="path-container"></div>
+            <div id="grid" class="grid gap-2 p-2 w-full h-full"></div>
+        </main>
+
+        <!-- Footer -->
+        <footer class="w-full flex items-center justify-between p-2">
+            <button id="hint-button" class="flex items-center justify-center w-16 h-16 rounded-full bg-yellow-500 hover:bg-yellow-600 transition text-4xl">
+                💡
+            </button>
+            <div class="text-center flex-grow">
+                <div class="text-sm" style="color: var(--text-secondary);">ТЕКУЩЕЕ ЗНАЧЕНИЕ</div>
+                <div id="current-value-display" class="text-3xl font-bold transition-colors duration-300">0</div>
+            </div>
+            <div class="w-16"></div> <!-- Spacer -->
+        </footer>
+    </div>
+    
+    <!-- Pause Modal -->
+    <div id="pause-modal" class="screen modal-backdrop flex-col items-center justify-center p-8">
+        <div class="rounded-2xl p-8 shadow-2xl w-full max-w-xs text-center space-y-6" style="background-color: var(--bg-secondary);">
+            <h3 class="text-3xl font-bold">Пауза</h3>
+            <div class="flex flex-col space-y-4">
+                <button id="resume-button" class="w-full text-white font-bold py-3 px-4 rounded-xl text-lg transform hover:scale-105 transition-all duration-300" style="background-color: var(--bg-interactive);">Продолжить</button>
+                <button id="restart-button" class="w-full font-bold py-3 px-4 rounded-xl text-lg transform hover:scale-105 transition-all duration-300 btn-restart">Заново</button>
+                <button id="main-menu-button-pause" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-4 rounded-xl text-lg transform hover:scale-105 transition-all duration-300">Главное меню</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats Screen -->
+    <div id="stats-screen" class="screen flex-col items-center p-4 sm:p-8">
+        <div class="w-full max-w-md h-full flex flex-col">
+            <div class="relative text-center py-4 flex-shrink-0">
+                 <button id="stats-back-button" class="absolute top-1/2 left-0 -translate-y-1/2 p-2 rounded-full transition" style="background-color: var(--bg-tertiary);">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+                </button>
+                <h3 class="text-3xl font-black" style="color: var(--text-primary);">Статистика</h3>
+            </div>
+            <div class="flex-grow mt-4 overflow-y-auto">
+                <table class="w-full text-left border-collapse" style="color: var(--text-primary);">
+                    <thead>
+                        <tr>
+                            <th class="p-3 text-lg font-bold">Режим</th>
+                            <th class="p-3 text-lg font-bold text-right">Уровней пройдено</th>
+                        </tr>
+                    </thead>
+                    <tbody id="stats-table-body">
+                        <!-- Rows generated by JS -->
+                    </tbody>
+                </table>
+            </div>
+            <div class="flex-shrink-0 mt-4">
+                <button id="reset-stats-button" class="w-full text-sm text-red-500 hover:text-red-400 transition py-2">Сбросить всю статистику</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Rules Screen -->
+    <div id="rules-screen" class="screen flex-col items-center p-4 sm:p-8">
+        <div class="w-full max-w-md h-full flex flex-col">
+            <div class="relative text-center py-4 flex-shrink-0">
+                <button id="rules-back-button" class="absolute top-1/2 left-0 -translate-y-1/2 p-2 rounded-full transition" style="background-color: var(--bg-tertiary);">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+                </button>
+                <h3 class="text-3xl font-black" style="color: var(--text-primary);">Правила</h3>
+            </div>
+            <div class="flex-grow mt-4 space-y-6 text-left overflow-y-auto" style="color: var(--text-primary);">
+                <p class="text-lg leading-relaxed">Соединяйте <strong style="color: var(--text-accent);">числа</strong> и <strong style="color: var(--text-accent);">операторы</strong>, чтобы получить <strong style="color: var(--text-accent);">целевое значение</strong>.</p>
+                <p>1. Начните с любого числа.</p>
+                <p>2. Проведите пальцем или мышью к соседнему оператору, а затем к следующему числу.</p>
+                <p>3. Путь должен состоять как минимум из 3 ячеек (число → оператор → число).</p>
+                
+                <div class="rules-illustration">
+                    <p class="mb-2 text-center w-full">Пример: получить <strong>15</strong></p>
+                    <div id="rules-grid" class="grid grid-cols-3 gap-2">
+                        <!-- Illustration cells generated by JS -->
+                    </div>
+                </div>
+
+                 <p class="pt-4">Если застряли, нажмите кнопку подсказки 💡.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Level Complete Modal -->
+    <div id="level-complete-modal" class="screen modal-backdrop flex-col items-center justify-center p-8">
+        <div class="rounded-2xl p-8 shadow-2xl w-full max-w-xs text-center space-y-6 transform scale-0 transition-transform duration-500 ease-out" id="level-complete-content" style="background-color: var(--bg-secondary);">
+            <div class="relative">
+                <div class="absolute -top-16 left-1/2 -translate-x-1/2 w-24 h-24 bg-green-500 rounded-full flex items-center justify-center shadow-lg shadow-green-500/50">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                </div>
+            </div>
+            <h3 class="text-3xl font-bold pt-8">Отлично!</h3>
+            <p style="color: var(--text-secondary);">Уровень <span id="completed-level-num"></span> пройден!</p>
+            <button id="next-level-button" class="w-full text-white font-bold py-3 px-4 rounded-xl text-lg transform hover:scale-105 transition-all duration-300" style="background-color: var(--bg-interactive);">Следующий уровень</button>
+        </div>
+    </div>
+
 
     <script>
-    // Глобальный обработчик, который вызовет OK SDK после своей загрузки
-    var OK_API_init_success = function() {
-        // Получаем параметры запуска
-        const params = FAPI.Util.getRequestParameters();
-        
-        // Инициализируем FAPI
-        FAPI.init(params.api_server, params.apiconnection,
-            () => {
-                console.log("OK FAPI inited successfully");
-                // Запускаем основную логику игры
-                runGame(params);
-            },
-            (error) => {
-                console.error("OK FAPI init error", error);
-                // Запускаем игру в гостевом режиме при ошибке
-                runGame(null);
-            }
-        );
-    };
-
-    // Основная функция, содержащая всю логику игры
-    async function runGame(okParams) {
-        let levelsPlayedSinceAd = 0;
-        const LEVELS_TO_UNLOCK = 30;
-        const INTERSTITIAL_AD_FREQUENCY = 2;
-        let gameState = { levels: { 5: 1, 6: 1, 7: 1, 8: 1 }, theme: 'light' };
-const wordsDB = {
-            4: ["БАБА", "БАЗА", "БАНК", "БЕДА", "БОЛЬ", "БРАК", "БРАТ", "БЫЛЬ", "ВЕЩЬ", "ВИНА", "ВИНО", "ВКУС", "ВОДА", "ВОЛЯ", "ВРАГ",
-"ВРАЧ", "ВХОД", "ГЛАЗ", "ГОРА", "ГРЕХ", "ГУБА", "ДАМА", "ДАЧА", "ДВОР", "ДЕЛО", "ДЕНЬ", "ДОЛГ", "ДОЛЯ", "ДОЧЬ", "ДРУГ", "ДУМА", "ДУША", "ДЯДЯ", "ЖЕНА", "ЗВУК", "ЗИМА", "ЗНАК",
-"ЗОНА", "ИГРА", "ИДЕЯ", "ИТОГ", "ИЮЛЬ", "ИЮНЬ", "КАДР", "КЛУБ", "КЛЮЧ", "КОЖА", "КОНЬ", "КОФЕ", "КРАЙ", "КРИК", "КУРС", "КУСТ", "ЛЕТО", "ЛИСТ", "ЛИЦО", "МАМА", "МАТЬ", "МЕРА",
-"МЕТР", "МИНА", "МОЗГ", "МОРЕ", "МОСТ", "МЯСО", "НЕБО", "НОГА", "НОЧЬ", "ОБЕД", "ОКНО", "ОПЫТ", "ОТЕЦ", "ОЧКО", "ПАПА", "ПАРА", "ПИВО", "ПЛАН", "ПОЛЕ", "ПОЛК", "ПОЭТ", "ПУТЬ",
-"РЕКА", "РИСК", "РОЛЬ", "РУКА", "РЫБА", "СБОР", "СЕЛО", "СЕМЬ", "СЕТЬ", "СЛОЙ", "СЛУХ", "СМЕХ", "СНЕГ", "СОЮЗ", "СПОР", "СРОК", "СТИХ", "СТОЛ", "СТУЛ", "СУТЬ", "СЧЕТ", "ТАНК",
-"ТЕЛО", "ТЕМП", "ТЕНЬ", "ТЕТЯ", "ТРУД", "УГОЛ", "УДАР", "УЖАС", "УРОК", "УТРО", "УХОД", "УЧЕТ", "ФАКТ", "ФОНД", "ХЛЕБ", "ХРАМ", "ЦАРЬ", "ЦВЕТ", "ЦЕЛЬ", "ЦЕНА", "ЧЕРТ", "ЧЛЕН",
-"ЧУДО", "ШАНС", "ШТАБ", "ШТАТ", "ЩЕКА", "ЭТАЖ", "ЭТАП", "ЯЗЫК", "ЯЩИК"],
-            5: ["АББАТ", "АБЗАЦ", "АБОРТ", "АВАНС", "АВЕНЮ", "АВРАЛ", "АВТОР", "АГЕНТ", "АДЕПТ", "АДМИН", "АДРЕС", "АЗАРТ", "АЗИАТ", "АЙРАН",
-    "АКРИЛ", "АКТЕР", "АКУЛА", "АКЦИЗ", "АКЦИЯ", "АЛИБИ", "АЛКАШ", "АЛЛАХ", "АЛЛЕЯ", "АЛМАЗ", "АМБАЛ", "АМБАР", "АМБРЕ", "АМЕБА", "АМПЕР", "АМПИР", "АНГАР", "АНГЕЛ", "АНИМЕ", "АНИОН",
-    "АНКЕР", "АНОНС", "АОРТА", "АРБУЗ", "АРГОН", "АРЕАЛ", "АРЕНА", "АРЕСТ", "АРМИЯ", "АРХИВ", "АРШИН", "АСКЕТ", "АСТМА", "АТАКА", "АТЛАС", "АТЛЕТ", "АУДИО", "АУДИТ", "АФЕРА", "АФИША",
-    "БАБКА", "БАБЛО", "БАГАЖ", "БАГЕТ", "БАДЬЯ", "БАЗАР", "БАЗИС", "БАЙКА", "БАЛДА", "БАЛЕТ", "БАЛКА", "БАЛЫК", "БАНАН", "БАНДА", "БАНЕР", "БАНКА", "БАРАН", "БАРБИ", "БАРЖА", "БАРИН",
-    "БАРОН", "БАСНЯ", "БАТОН", "БАТУТ", "БАЧОК", "БАШКА", "БАШНЯ", "БЕГУН", "БЕДРО", "БЕЙДЖ", "БЕКОН", "БЕЛКА", "БЕЛОК", "БЕЛЬЕ", "БЕЛЯШ", "БЕРДО", "БЕРЕГ", "БЕТОН", "БИДОН", "БИЗОН",
-    "БИЛЕТ", "БИНГО", "БИНОМ", "БИРЖА", "БИРКА", "БИСЕР", "БИТВА", "БИТОК", "БИТУМ", "БИТЬЕ", "БЛАГО", "БЛАЖЬ", "БЛАНК", "БЛЕСК", "БЛИЗЬ", "БЛОХА", "БЛУЗА", "БЛЮДО", "БЛЯХА", "БОБЕР",
-    "БОГАЧ", "БОДУН", "БОЗОН", "БОИНГ", "БОЙНЯ", "БОКАЛ", "БОЛИД", "БОМБА", "БОНУС", "БОРЕЦ", "БОСЯК", "БОТАН", "БОТВА", "БОЧКА", "БОЧОК", "БРАНЬ", "БРАСС", "БРЕМЯ", "БРЕНД", "БРЕШЬ",
-    "БРОВЬ", "БРОНЬ", "БРОНЯ", "БРОШЬ", "БРЭНД", "БРЮКИ", "БРЮХО", "БУБЕН", "БУГАЙ", "БУГОР", "БУДДА", "БУДКА", "БУДНИ", "БУКВА", "БУКЕТ", "БУЛКА", "БУРАН", "БУРДА", "БУРОВ", "БУТИК",
-    "БУТОН", "БУФЕР", "БУФЕТ", "БУХТА", "БЫДЛО", "БЫТИЕ", "БЫЧОК", "ВАГОН", "ВАЛЕТ", "ВАЛИК", "ВАЛУЙ", "ВАЛУН", "ВАЛЬС", "ВАННА", "ВАРАН", "ВАРКА", "ВАРЯГ", "ВАТЕР", "ВАТКА",
-    "ВАФЛЯ", "ВАХТА", "ВБРОС", "ВДОВА", "ВЕДРО", "ВЕДУН", "ВЕНЕЦ", "ВЕНИК", "ВЕНОК", "ВЕПРЬ", "ВЕРБА", "ВЕРФЬ", "ВЕСЛО", "ВЕСНА", "ВЕТВЬ", "ВЕТЕР", "ВЕТКА", "ВЕТЛА", "ВЕЧЕР", "ВЗВОД",
-    "ВЗДОР", "ВЗДОХ", "ВЗЛЕТ", "ВЗЛОМ", "ВЗМАХ", "ВЗНОС", "ВЗРЫВ", "ВЗЫСК", "ВИДЕО", "ВИЗИТ", "ВИЛКА", "ВИЛЛА", "ВИРУС", "ВИСКИ", "ВИСОК", "ВИТЬЕ", "ВИХРЬ", "ВИШНЯ", "ВКЛАД", "ВЛАГА",
-    "ВОБЛА", "ВОДКА", "ВОЖАК", "ВОЖДЬ", "ВОЗНЯ", "ВОЙНА", "ВОКАЛ", "ВОЛНА", "ВОЛОС", "ВОЛХВ", "ВОЛЬТ", "ВОПЛЬ", "ВОРОН", "ВОРОТ", "ВОРОХ", "ВОШКА", "ВОЯКА", "ВРАКИ", "ВРАТА", "ВРЕМЯ",
-    "ВСХОД", "ВУАЛЬ", "ВЪЕЗД", "ВЫБОР", "ВЫВИХ", "ВЫВОД", "ВЫВОЗ", "ВЫГИБ", "ВЫГУЛ", "ВЫДЕЛ", "ВЫДОХ", "ВЫДРА", "ВЫЕЗД", "ВЫЗОВ", "ВЫКОС", "ВЫКУП", "ВЫЛАЗ", "ВЫЛЕТ", "ВЫНОС", "ВЫПАД",
-    "ВЫРЕЗ", "ВЫРУБ", "ВЫСЕВ", "ВЫХОД", "ВЫЧЕТ", "ВЫШКА", "ВЬЮГА", "ВЯТКА", "ГАЙКА", "ГАЛКА", "ГАЛОН", "ГАЛОП", "ГАМАК", "ГАММА", "ГАРАЖ", "ГЕНИЙ", "ГЕНОМ", "ГЕРОЙ", "ГЕТРЫ", "ГЕТТО",
-    "ГИДРА", "ГИЕНА", "ГЛАВА", "ГЛАДЬ", "ГЛИНА", "ГЛИСТ", "ГЛУБЬ", "ГЛУШЬ", "ГЛЫБА", "ГНИЛЬ", "ГОЛОД", "ГОЛОС", "ГОЛЬФ", "ГОНЕЦ", "ГОНКА", "ГОНОР", "ГОРЕЦ", "ГОРКА", "ГОРЛО", "ГОРОД",
-    "ГОРОХ", "ГОСТЬ", "ГРАММ", "ГРАНЬ", "ГРИВА", "ГРИЛЬ", "ГРИПП", "ГРОЗА", "ГРУДЬ", "ГРУНТ", "ГРУША", "ГРЫЖА", "ГРЯЗЬ", "ГУБКА", "ГУДОК", "ГУЛЯШ", "ГУСЛИ", "ДАВКА", "ДАМБА", "ДАМКА",
-    "ДАРТС", "ДВЕРЬ", "ДЕБЕТ", "ДЕБЮТ", "ДЕВИЗ", "ДЕВКА", "ДЕДКА", "ДЕКАН", "ДЕКОР", "ДЕЛЕЖ", "ДЕЛЕЦ", "ДЕМОН", "ДЕТКА", "ДЕФИС", "ДЖИНН", "ДИВАН", "ДИЕТА", "ДИЛЕР", "ДИСКО", "ДЛАНЬ",
-    "ДЛИНА", "ДНИЩЕ", "ДНЮХА", "ДОБРО", "ДОВОД", "ДОГМА", "ДОЖДЬ", "ДОЗОР", "ДОЙКА", "ДОКЕР", "ДОМЕН", "ДОМИК", "ДОНОС", "ДОСКА", "ДОСУГ", "ДОСЬЕ", "ДОХОД", "ДОЧКА", "ДРАЖЕ", "ДРАКА",
-    "ДРАМА", "ДРЕВО", "ДРЕДЫ", "ДРЕЛЬ", "ДРИФТ", "ДРОБЬ", "ДРОВА", "ДРОЗД", "ДРУИД", "ДУБКА", "ДУБЛЬ", "ДУДКА", "ДУПЛО", "ДУРАК", "ДУШКА", "ДУЭЛЬ", "ДЫЛДА", "ДЫМКА", "ДЫМОК", "ДЫРКА",
-    "ДЫШЛО", "ДЮШЕС", "ДЯТЕЛ", "ЕВРЕЙ", "ЕГЕРЬ", "ЕЗДОК", "ЕРЕСЬ", "ЕРШИК", "ЖАЖДА", "ЖАКЕТ", "ЖАТВА", "ЖАТКА", "ЖЕЛЧЬ", "ЖЕНИХ", "ЖЕРДЬ", "ЖЕРЛО", "ЖЕСТЬ", "ЖЕТОН", "ЖИВОТ", "ЖИЗНЬ",
-    "ЖИЛЕТ", "ЖИЛЕЦ", "ЖИЛКА", "ЖИЛЬЕ", "ЖИРАФ", "ЖОКЕЙ", "ЖРИЦА", "ЖУЛИК", "ЖУЧОК", "ЗАБЕГ", "ЗАБОЙ", "ЗАБОР", "ЗАВАЛ", "ЗАВЕТ", "ЗАВОД", "ЗАВОЗ", "ЗАВУЧ", "ЗАГАР", "ЗАГОН", "ЗАЕЗД",
-    "ЗАЖИМ", "ЗАЖОР", "ЗАЗОР", "ЗАЗЫВ", "ЗАИКА", "ЗАЙКА", "ЗАКАЗ", "ЗАКАЛ", "ЗАКАТ", "ЗАКОЛ", "ЗАКОН", "ЗАКУП", "ЗАЛОГ", "ЗАМАХ", "ЗАМЕС", "ЗАМОК", "ЗАНОС", "ЗАПАД", "ЗАПАС", "ЗАПАХ",
-    "ЗАПОР", "ЗАРЕЗ", "ЗАРУБ", "ЗАРЯД", "ЗАСОВ", "ЗАСОЛ", "ЗАСОР", "ЗАТОН", "ЗАТОР", "ЗАЧЕТ", "ЗВЕНО", "ЗВЕРЬ", "ЗЕБРА", "ЗЕВОК", "ЗЕЛЬЕ", "ЗЕМЛЯ", "ЗЕНИТ", "ЗЕРНО", "ЗЕФИР", "ЗНАМЯ",
-    "ЗОМБИ", "ИГРОК", "ИДЕАЛ", "ИДИОТ", "ИЗВОЗ", "ИЗГИБ", "ИЗГОЙ", "ИЗЛОМ", "ИЗМОР", "ИЗНОС", "ИЗЪЯН", "ИЗЫСК", "ИКОНА", "ИКОТА", "ИМИДЖ", "ИНГУШ", "ИНДУС", "ИНДЮК", "ИНЖИР", "ИНКУБ",
-    "ИОДИД", "ИРБИС", "ИСКРА", "ИСПУГ", "ИСТЕЦ", "ИСТОК", "ИСХОД", "КАБАК", "КАБАН", "КАВЕР", "КАГОР", "КАДЫК", "КАЗАК", "КАЗАН", "КАЗАХ", "КАЗНА", "КАЗНЬ", "КАЗУС", "КАКАО", "КАЛАЧ",
-    "КАЛИЙ", "КАМАЗ", "КАМИН", "КАМЫШ", "КАНАЛ", "КАНАТ", "КАНОН", "КАНОЭ", "КАНУН", "КАПЛЯ", "КАПОТ", "КАППА", "КАРАТ", "КАРГА", "КАРМА", "КАРРИ", "КАРТА", "КАСКА", "КАСКО", "КАССА",
-    "КАСТА", "КАТЕР", "КАТЕТ", "КАТОД", "КАТОК", "КАТЫШ", "КАФИР", "КАЧКА", "КАШКА", "КАЮТА", "КВАНТ", "КВАРК", "КВАРЦ", "КВЕСТ", "КВОТА", "КЕБАБ", "КЕГЛЯ", "КЕПКА", "КЕФИР", "КИОСК",
-    "КИРЗА", "КИРКА", "КИСЕТ", "КИСКА", "КИСТА", "КИСТЬ", "КИФОЗ", "КИШКА", "КЛАДЬ", "КЛАСС", "КЛЕРК", "КЛЕЩИ", "КЛИШЕ", "КЛОУН", "КЛУША", "КЛЯЧА", "КНИГА", "КНЯЗЬ", "КОАЛА", "КОБЛЬ",
-    "КОБРА", "КОВЕР", "КОВКА", "КОЖУХ", "КОЗЕЛ", "КОЗЛЫ", "КОЗНИ", "КОЙКА", "КОЙОТ", "КОКОН", "КОКОС", "КОЛБА", "КОЛЕЯ", "КОЛОС", "КОМАР", "КОМИК", "КОМОД", "КОМОК", "КОНЕК", "КОНЕЦ",
-    "КОНУС", "КОНЮХ", "КОПИЯ", "КОПЬЕ", "КОРАН", "КОРКА", "КОРМА", "КОРОБ", "КОСТЬ", "КОСЯК", "КОТЕЛ", "КОТИК", "КОТЛЫ", "КОФТА", "КОЧАН", "КОЧКА", "КОШКА", "КОЩЕЙ", "КРАЖА", "КРАСА",
-    "КРАФТ", "КРЕСТ", "КРОВЬ", "КРОНА", "КРОХА", "КРУИЗ", "КРУПА", "КРЫЛО", "КРЫСА", "КРЫША", "КСИВА", "КУБИК", "КУБОК", "КУДРИ", "КУЗОВ", "КУКИШ", "КУКЛА", "КУЛАК", "КУЛЕК", "КУЛЕР",
-    "КУЛИЧ", "КУЛОН", "КУЛЬТ", "КУМИР", "КУМЫС", "КУПАЖ", "КУПЕЦ", "КУПОЛ", "КУПОН", "КУРАЖ", "КУРОК", "КУСОК", "КУХНЯ", "КЮВЕТ", "ЛАВАШ", "ЛАВКА", "ЛАДАН", "ЛАДЬЯ", "ЛАЗЕР", "ЛАЙКА",
-    "ЛАКЕЙ", "ЛАМПА", "ЛАПКА", "ЛАПТА", "ЛАПША", "ЛАРЕК", "ЛАРЕЦ", "ЛАСКА", "ЛАССО", "ЛЕВША", "ЛЕЙКА", "ЛЕММА", "ЛЕМУР", "ЛЕНТА", "ЛЕСКА", "ЛЕШИЙ", "ЛИАНА", "ЛИДАР", "ЛИДЕР", "ЛИКЕР",
-    "ЛИМИТ", "ЛИМОН", "ЛИМФА", "ЛИНЗА", "ЛИНИЯ", "ЛИПЕЦ", "ЛИТИЙ", "ЛИТЬЕ", "ЛИЦЕЙ", "ЛОББИ", "ЛОВЕЦ", "ЛОГИН", "ЛОДКА", "ЛОЖКА", "ЛОКОН", "ЛОМКА", "ЛОПУХ", "ЛОТОК", "ЛОТОС", "ЛУЖОК",
-    "ЛУЗЕР", "ЛУНКА", "ЛУЧИК", "ЛЫЖНЯ", "ЛЮПИН", "ЛЮПУС", "ЛЮТИК", "ЛЮТНЯ", "ЛЮЧОК", "ЛЯЖКА", "ЛЯМКА", "МАГИЯ", "МАГМА", "МАДАМ", "МАЖОР", "МАЗЕР", "МАЗКА", "МАЗОК", "МАЗУТ", "МАЙОР",
-    "МАКЕТ", "МАЛЕК", "МАЛЕЦ", "МАЛЫШ", "МАЛЯР", "МАМБА", "МАНГО", "МАНЕЖ", "МАНЕР", "МАНИЯ", "МАНКА", "МАНОК", "МАРЖА", "МАРЛЯ", "МАСКА", "МАСЛО", "МАССА", "МАСТЬ", "МАТКА", "МАФИЯ",
-    "МЕДИК", "МЕДОК", "МЕДЯК", "МЕЛОК", "МЕРИН", "МЕСТО", "МЕСТЬ", "МЕСЯЦ", "МЕТАН", "МЕТКА", "МЕТЛА", "МЕТОД", "МЕТРО", "МЕЧТА", "МЕШОК", "МИДИЯ", "МИРАЖ", "МИСКА", "МИШКА", "МОДЕМ",
-    "МОЙКА", "МОЛВА", "МОЛЯР", "МОНАХ", "МОПЕД", "МОРДА", "МОРЯК", "МОТИВ", "МОТОК", "МОТОР", "МОЧКА", "МУЖИК", "МУЗЕЙ", "МУЛЯЖ", "МУМИЯ", "МУСОР", "МУФТА", "МУШКА", "МЫСЛЬ", "МЫШКА",
-    "МЫШЦА", "МЭРИЯ", "МЮСЛИ", "МЯТЕЖ", "МЯЧИК", "НАБЕГ", "НАБОР", "НАВЕС", "НАВОЗ", "НАВЫК", "НАГАР", "НАЛЕТ", "НАЛОГ", "НАМЕК", "НАПОР", "НАРДЫ", "НАРОД", "НАРЫВ", "НАРЯД", "НАСОС",
-    "НАСЫП", "НАТЯГ", "НАУКА", "НАХАЛ", "НАЦИЯ", "НАЧЕС", "НЕДРА", "НЕДУГ", "НЕМЕЦ", "НЕМКА", "НЕНЕЦ", "НЕНКА", "НЕФТЬ", "НИТКА", "НОЖИК", "НОЖКА", "НОЖНЫ", "НОМЕР", "НОРКА", "НОРМА",
-    "НОСАЧ", "НОСИК", "НОСКА", "НОСОК", "НОТКА", "НОЧКА", "НУЖДА", "НУЛИК", "НУТРО", "НЫТИК", "НЫТЬЕ", "НЮАНС", "НЮХАЧ", "НЯШКА", "ОАЗИС", "ОБВАЛ", "ОБВЕС", "ОБВОД", "ОБВОЗ", "ОБГОН",
-    "ОБЗОР", "ОБЛИК", "ОБМАН", "ОБМЕН", "ОБРАЗ", "ОБРЕЗ", "ОБРОК", "ОБРУЧ", "ОБРЫВ", "ОБРЯД", "ОБУВЬ", "ОБХОД", "ОБЪЕМ", "ОБЫСК", "ОВРАГ", "ОГОНЬ", "ОЗЕРО", "ОКЕАН", "ОКЛАД", "ОКРУГ",
-    "ОКСИД", "ОКТАН", "ОЛЕНЬ", "ОЛИВА", "ОЛОВО", "ОЛЬХА", "ОМЛЕТ", "ОПЕРА", "ОПИАТ", "ОПИСЬ", "ОПОРА", "ОПРОС", "ОПУСК", "ОПЦИЯ", "ОРГАН", "ОРДЕН", "ОРДЕР", "ОРЕОЛ", "ОСАДА", "ОСЕНЬ",
-    "ОСЕТР", "ОСИНА", "ОСКАЛ", "ОСЛИК", "ОСОБА", "ОСОБЬ", "ОСОКА", "ОТБОР", "ОТВАЛ", "ОТВАР", "ОТВЕТ", "ОТВОД", "ОТВОЗ", "ОТГИБ", "ОТДЕЛ", "ОТДЫХ", "ОТЕЛЬ", "ОТЖИМ", "ОТЗЫВ", "ОТКАЗ",
-    "ОТКАТ", "ОТЛОВ", "ОТМАХ", "ОТПАД", "ОТПОР", "ОТРЕЗ", "ОТРОК", "ОТРУБ", "ОТРЫВ", "ОТРЯД", "ОТСЕК", "ОТХОД", "ОТЧЕТ", "ОХВАТ", "ОХОТА", "ПАДЕЖ", "ПАДУБ", "ПАЙКА", "ПАКЕТ", "ПАЛАЧ",
-    "ПАЛЕЦ", "ПАЛКА", "ПАНДА", "ПАННО", "ПАПКА", "ПАРАД", "ПАРИК", "ПАРТА", "ПАРУС", "ПАСТА", "ПАСХА", "ПАУЗА", "ПАЦАН", "ПАЧКА", "ПЕВЕЦ", "ПЕГАС", "ПЕКЛО", "ПЕМЗА", "ПЕНАЛ", "ПЕНЕК",
-    "ПЕНКА", "ПЕПЕЛ", "ПЕРЕЦ", "ПЕРСТ", "ПЕСЕЦ", "ПЕСИК", "ПЕСНЯ", "ПЕСОК", "ПЕТУХ", "ПЕЧКА", "ПЕШКА", "ПИКАП", "ПИКЕТ", "ПИЛОН", "ПИЛОТ", "ПИНОК", "ПИНТА", "ПИРАТ", "ПИРОГ", "ПИРОН",
-    "ПИСЕЦ", "ПИТОН", "ПИХТА", "ПИЦЦА", "ПЛАВЬ", "ПЛАМЯ", "ПЛАТА", "ПЛАТО", "ПЛЕМЯ", "ПЛЕСК", "ПЛЕЧО", "ПЛИТА", "ПЛОТЬ", "ПОБЕГ", "ПОБОИ", "ПОВАР", "ПОВОД", "ПОГОН", "ПОЕЗД", "ПОЖАР",
-    "ПОЖОГ", "ПОЗОР", "ПОИСК", "ПОЙЛО", "ПОКАЗ", "ПОКЕР", "ПОКОИ", "ПОКОЙ", "ПОКОС", "ПОЛЕТ", "ПОЛИП", "ПОЛИС", "ПОЛКА", "ПОЛЮС", "ПОЛЯК", "ПОМЕТ", "ПОМОИ", "ПОМПА", "ПОНЧО", "ПОРЕЗ",
-    "ПОРЕЙ", "ПОРКА", "ПОРОГ", "ПОРОК", "ПОРОХ", "ПОРТЫ", "ПОРЧА", "ПОРЫВ", "ПОСЕВ", "ПОСОЛ", "ПОСОХ", "ПОСЫЛ", "ПОТОК", "ПОТОП", "ПОХОД", "ПОЧВА", "ПОЧЕТ", "ПОЧКА", "ПОЧТА", "ПОШИВ",
-    "ПОЭМА", "ПРАВО", "ПРАЙД", "ПРЕСС", "ПРИЕМ", "ПРИНЦ", "ПРИЮТ", "ПРОБА", "ПРОГА", "ПРОЕМ", "ПРОЗА", "ПРОФИ", "ПРУСС", "ПРЯЖА", "ПРЯХА", "ПСАРЬ", "ПТАХА", "ПТИЦА", "ПУАНТ", "ПУГАЧ",
-    "ПУДРА", "ПУЗАЧ", "ПУЛЬС", "ПУЛЬТ", "ПУНКТ", "ПУПОК", "ПУРГА", "ПУФИК", "ПУЧОК", "ПУШКА", "ПУШОК", "ПЧЕЛА", "ПШЕНО", "ПЫЖИК", "ПЫТКА", "ПЫШКА", "ПЬЕСА", "ПЬЯНЬ", "ПЯТНО", "РАДАР",
-    "РАДИО", "РАДОН", "РАЗОК", "РАЗУМ", "РАЙОН", "РАКОВ", "РАМКА", "РАМПА", "РАНЕЦ", "РАНКА", "РАНЧО", "РАУНД", "РАХИТ", "РАЦИЯ", "РАЧОК", "РВОТА", "РЕБРО", "РЕБУС", "РЕВУН", "РЕГБИ",
-    "РЕГГИ", "РЕДИС", "РЕЖИМ", "РЕЗНЯ", "РЕЗУС", "РЕЛЬС", "РЕПЕЙ", "РЕПЕР", "РЕПКА", "РЕТРО", "РЕЧКА", "РЕШКА", "РИДЕР", "РИФМА", "РОБОТ", "РОВНЯ", "РОГАЧ", "РОГОЗ", "РОДЕО", "РОДИЙ",
-    "РОДИЧ", "РОДНЯ", "РОЖОК", "РОЗГА", "РОЗНЬ", "РОКОТ", "РОЛИК", "РОМАН", "РОПОТ", "РОТОР", "РОХЛЯ", "РОЯЛЬ", "РТУТЬ", "РУБЕЖ", "РУБЕЦ", "РУБИН", "РУБКА", "РУБЛЬ", "РУЖЬЕ", "РУИНА",
-    "РУКАВ", "РУЛЕТ", "РУЛОН", "РУПОР", "РУСЛО", "РУЧЕЙ", "РУЧКА", "РЫБАК", "РЫБКА", "РЫВОК", "РЫНОК", "РЫЧАГ", "РЭПЕР", "РЮМКА", "РЮШКА", "РЯСКА", "САДИК", "САЗАН", "САЙГА", "САЙРА",
-    "САЛАТ", "САЛКИ", "САЛОН", "САЛЮТ", "САМБО", "САМЕЦ", "САМКА", "САПЕР", "САПОГ", "САРАЙ", "САУНА", "САХАР", "САЧОК", "СБРОД", "СБРОС", "СБРУЯ", "СВАХА", "СВЕЧА", "СВИСТ", "СВИТА",
-    "СВОРА", "СВЯЗЬ", "СГЛАЗ", "СДАЧА", "СДОБА", "СЕАНС", "СЕВЕР", "СЕГУН", "СЕДЛО", "СЕЗАМ", "СЕЗОН", "СЕКАЧ", "СЕКТА", "СЕЛФИ", "СЕМГА", "СЕМЬЯ", "СЕНАТ", "СЕРИЯ", "СЕТКА", "СИГМА",
-    "СИМКА", "СИНОД", "СИНУС", "СИНЯК", "СИРОП", "СИФОН", "СКАЛА", "СКАУТ", "СКВЕР", "СКВОШ", "СКЕЙТ", "СКЛАД", "СКЛЕП", "СКЛОН", "СКОБА", "СКОТЧ", "СКРАБ", "СКУЛА", "СКУНС", "СЛАВА",
-    "СЛАЙД", "СЛЕЗА", "СЛЕНГ", "СЛИВА", "СЛИЗЬ", "СЛОВО", "СЛУГА", "СЛЮДА", "СЛЮНА", "СМЕНА", "СМЕРЧ", "СМЕСЬ", "СМЕТА", "СМОЛА", "СМЫСЛ", "СОБОР", "СОВЕТ", "СОВОК", "СОДОМ", "СОЗЫВ",
-    "СОЙКА", "СОКОЛ", "СОЛОД", "СОПЛО", "СОПЛЯ", "СОПОР", "СОПУН", "СОСЕД", "СОСКА", "СОСНА", "СОСУД", "СОТКА", "СОТНЯ", "СПЕСЬ", "СПИНА", "СПИРТ", "СПИЦА", "СПЛАВ", "СПОРА", "СПОРТ",
-    "СПРОС", "СПРУТ", "СПУСК", "СРЕДА", "ССОРА", "ССУДА", "СТАДО", "СТАЛЬ", "СТАРТ", "СТВОЛ", "СТВОР", "СТЕЗЯ", "СТЕЙК", "СТЕЛА", "СТЕЛС", "СТЕНА", "СТЕНД", "СТЕПЬ", "СТИЛЬ", "СТИХИ",
-    "СТОЛБ", "СТОЛП", "СТОПА", "СТОЯК", "СТРАЖ", "СТРАХ", "СТРИМ", "СТРИТ", "СТРОЙ", "СТРУЯ", "СТУЖА", "СУДАК", "СУДНО", "СУДЬЯ", "СУЕТА", "СУКНО", "СУМКА", "СУММА", "СУСЛО", "СУТКИ",
-    "СУФЛЕ", "СУЧОК", "СУШКА", "СФЕРА", "СХЕМА", "СЦЕНА", "СЧЕТЫ", "СЪЕЗД", "СЫНОК", "СЫРОК", "СЫРЬЕ", "СЫЩИК", "СЮЖЕТ", "ТАБАК", "ТАБЛО", "ТАБОР", "ТАБУН", "ТАЗИК", "ТАЙГА", "ТАЙНА",
-    "ТАКСА", "ТАКСИ", "ТАЛИК", "ТАЛИЯ", "ТАЛОН", "ТАНГО", "ТАНЕЦ", "ТАПАС", "ТАРАН", "ТАРИФ", "ТАСКА", "ТАЧКА", "ТВИСТ", "ТЕАТР", "ТЕЗИС", "ТЕКСТ", "ТЕЛЕК", "ТЕЛЕЦ", "ТЕЛКА", "ТЕМБР",
-    "ТЕНЕК", "ТЕНОР", "ТЕРКА", "ТЕСАК", "ТЕСЛО", "ТЕСТО", "ТЕСТЬ", "ТЕХНО", "ТИЗЕР", "ТИПАЖ", "ТИРАЖ", "ТИРАН", "ТИСКИ", "ТИТАН", "ТИТУЛ", "ТКАНЬ", "ТОВАР", "ТОЛПА", "ТОЛЩА", "ТОМАТ",
-    "ТОМИК", "ТОНИК", "ТОННА", "ТОНУС", "ТОПАЗ", "ТОПКА", "ТОПОР", "ТОПОТ", "ТОРЕЦ", "ТОРИЙ", "ТОСКА", "ТОТЕМ", "ТОЧКА", "ТРАВА", "ТРАКТ", "ТРАНС", "ТРАСТ", "ТРАТА", "ТРАУР", "ТРЕЛЬ",
-    "ТРЕНД", "ТРЕСК", "ТРЕСТ", "ТРЕТЬ", "ТРИКО", "ТРИОД", "ТРОМБ", "ТРОПА", "ТРОЯК", "ТРУБА", "ТРУСЫ", "ТРУХА", "ТУБУС", "ТУЗИК", "ТУЛУП", "ТУМАН", "ТУМБА", "ТУНЕЦ", "ТУПИК", "ТУРНЕ",
-    "ТУФЛЯ", "ТУЧКА", "ТЫКВА", "ТЫЧОК", "ТЮБИК", "ТЮРОК", "ТЮФЯК", "ТЯГАЧ", "ТЯЖБА", "ТЯПКА", "УГОЛЬ", "УГОРЬ", "УДАЧА", "УЗНИК", "УКЛАД", "УКЛОН", "УКРОП", "УКСУС", "УЛИКА", "УЛИЦА",
-    "УМНИК", "УМОРА", "УПРЕК", "УПЫРЬ", "УСПЕХ", "УСТОЙ", "УСТУП", "УТЕРЯ", "УТЕХА", "УТИЛЬ", "УХВАТ", "УЧЕБА", "УЩЕРБ", "ФАЗАН", "ФАКЕЛ", "ФАКИР", "ФАНАТ", "ФАСАД", "ФАСОН", "ФАУНА",
-    "ФАЯНС", "ФЕРЗЬ", "ФЕРМА", "ФЕСКА", "ФИБРА", "ФИЗИК", "ФИКУС", "ФИЛЬМ", "ФИНАЛ", "ФИНИК", "ФИНИШ", "ФИРМА", "ФИШКА", "ФЛАНГ", "ФЛИРТ", "ФЛОРА", "ФЛЮИД", "ФЛЯГА", "ФОБИЯ", "ФОКУС",
-    "ФОМКА", "ФОНДЮ", "ФОРМА", "ФОРУМ", "ФОТКА", "ФРАЕР", "ФРАЗА", "ФРЕЗА", "ФРЕОН", "ФРОНТ", "ФРУКТ", "ФУГАС", "ФУЖЕР", "ФУРОР", "ФЬОРД", "ХАБАР", "ХАКЕР", "ХАЛАТ", "ХАЛВА", "ХАМОН",
-    "ХАРЧО", "ХВОРЬ", "ХВОСТ", "ХИЛЯК", "ХИМИК", "ХИМИЯ", "ХИНДИ", "ХИТИН", "ХИТОН", "ХЛЕСТ", "ХЛЫСТ", "ХМЕЛЬ", "ХМЫРЬ", "ХОББИ", "ХОБОТ", "ХОДИК", "ХОДКА", "ХОДОК", "ХОДУН", "ХОЛКА",
-    "ХОЛОД", "ХОЛОП", "ХОЛСТ", "ХОМУТ", "ХОМЯК", "ХОРДА", "ХОРЕЙ", "ХОРЕК", "ХОХМА", "ХОХОЛ", "ХОХОТ", "ХРУСТ", "ХРЯПА", "ХУРМА", "ХУТОР", "ЦАПКА", "ЦАПЛЯ", "ЦАЦКА", "ЦЕВЬЕ", "ЦЕДРА",
-    "ЦЕЗИЙ", "ЦЕЛОЕ", "ЦЕНТР", "ЦЕПКА", "ЦЕРИЙ", "ЦИГАН", "ЦИНГА", "ЦИНИК", "ЦИФРА", "ЦОКОТ", "ЦУКАТ", "ЦЫГАН", "ЧАЙКА", "ЧАКРА", "ЧАСОК", "ЧАСТЬ", "ЧАШКА", "ЧЕЛКА", "ЧЕРВЫ", "ЧЕРВЬ",
-    "ЧЕРЕД", "ЧЕРЕП", "ЧЕРНЬ", "ЧЕРТА", "ЧЕСТЬ", "ЧЕХОЛ", "ЧЕШУЯ", "ЧИБИС", "ЧИЖИК", "ЧИПСЫ", "ЧИСЛО", "ЧИТЕР", "ЧОКЕР", "ЧРЕВО", "ЧТИВО", "ЧУВАШ", "ЧУГУН", "ЧУДАК", "ЧУДИК", "ЧУЖАК",
-    "ЧУЖОЕ", "ЧУЙКА", "ЧУКЧА", "ЧУЛАН", "ЧУЛОК", "ЧУМАК", "ЧУМКА", "ЧУТЬЕ", "ЧУШКА", "ШАВКА", "ШАЙБА", "ШАЙКА", "ШАКАЛ", "ШАЛАШ", "ШАЛУН", "ШАМАН", "ШАПКА", "ШАРИК", "ШАССЕ", "ШАССИ",
-    "ШАТЕН", "ШАТЕР", "ШАФЕР", "ШАХТА", "ШАШКА", "ШВАЛЬ", "ШЕЙКА", "ШЕПОТ", "ШЕРИФ", "ШИЗИК", "ШИРМА", "ШИТЬЕ", "ШИФЕР", "ШИШКА", "ШКАЛА", "ШКВАЛ", "ШКОЛА", "ШКУРА", "ШЛАНГ", "ШЛЕЙФ",
-    "ШЛИФТ", "ШЛЯПА", "ШМЕЛЬ", "ШНАПС", "ШНЯГА", "ШОБЛА", "ШОРОХ", "ШОРТЫ", "ШОССЕ", "ШОФЕР", "ШПАГА", "ШПАЛА", "ШПАНА", "ШПИЛЬ", "ШПИОН", "ШПОНА", "ШПОРА", "ШПРИЦ", "ШПРОТ", "ШРИФТ",
-    "ШТАМБ", "ШТАММ", "ШТАМП", "ШТАНЫ", "ШТИЛЬ", "ШТИФТ", "ШТОРА", "ШТОРМ", "ШТРАФ", "ШТРИХ", "ШТУКА", "ШТУРМ", "ШТЫРЬ", "ШУБКА", "ШУЛЕР", "ШУМЕР", "ШУРУП", "ШУТКА", "ШУХЕР", "ШХУНА",
-    "ЩЕБЕТ", "ЩЕГОЛ", "ЩЕЛКА", "ЩЕНОК", "ЩЕПКА", "ЩЕТКА", "ЩЕЧКА", "ЩИПОК", "ЩИТОК", "ЭГИДА", "ЭКЛЕР", "ЭКРАН", "ЭКШЕН", "ЭЛЕАТ", "ЭЛИТА", "ЭМАЛЬ", "ЭОЛИТ", "ЭПАРХ", "ЭПОХА", "ЭПЮРА",
-    "ЭРЗАЦ", "ЭСКИЗ", "ЭСТЕТ", "ЭТИКА", "ЭТНОС", "ЭФИОП", "ЮНИОР", "ЮНКЕР", "ЮНОША", "ЮРИСТ", "ЯБЕДА", "ЯГОДА", "ЯГУАР", "ЯИЧКО", "ЯКОРЬ", "ЯМЩИК", "ЯРЛЫК", "ЯРУГА", "ЯРЫГА", "ЯСЕНЬ",
-    "ЯСТВО"],
-            6: ["АБАЖУР", "АБСУРД", "АВАРИЯ", "АВАРКА", "АВГУСТ", "АНАЛИЗ", "АПРЕЛЬ", "АРТИСТ", "БЕСЕДА", "БИЗНЕС", "БОРЬБА", "БУМАГА",
-"БЮДЖЕТ", "БЮРГЕР", "ВЕРСИЯ", "ВЗГЛЯД", "ВЛАСТЬ", "ВНУЧКА", "ВОЗДУХ", "ВОЙСКО", "ВОПРОС", "ВОРОТА", "ВОСТОК", "ВЫБОРЫ", "ВЫГОДА", "ВЫПУСК", "ВЫСОТА", "ГАЗЕТА", "ГЛАВКА", "ГЛАГОЛ",
-"ГОЛОВА", "ГРОХОТ", "ГРУППА", "ДАННЫЕ", "ДВОРЕЦ", "ДЕНЬГИ", "ДЕРЕВО", "ДЕТАЛЬ", "ДОКЛАД", "ДОКТОР", "ДОЛЛАР", "ДОРОГА", "ДРУГОЙ", "ДРУЖБА", "ЖЕРТВА", "ЖИТЕЛЬ", "ЖУРНАЛ", "ЗАБОТА",
-"ЗАДАЧА", "ЗАПИСЬ", "ЗАЩИТА", "ЗВЕЗДА", "ЗВОНОК", "ЗДАНИЕ", "ЗНАНИЕ", "ЗОЛОТО", "ЗРЕНИЕ", "ИЗМЕНА", "ИЗОЛЯТ", "ИЗОМЕР", "КАМЕНЬ", "КАМЕРА", "КАРМАН", "КЛЕТКА", "КЛИЕНТ", "КНИЖКА",
-"КОДЕКС", "КОЛЕНО", "КОЛЕСО", "КОЛЬЦО", "КОМЕТА", "КОНЧИК", "КОНЬЯК", "КОРЕНЬ", "КОРОЛЬ", "КОРПУС", "КОСТЮМ", "КРАСКА", "КРЕДИТ", "КРЕСЛО", "КРИЗИС", "ЛАГЕРЬ", "ЛАДОНЬ", "ЛОБЗИК",
-"ЛОВКАЧ", "ЛОШАДЬ", "ЛЮБОВЬ", "МАСТЕР", "МАСТИТ", "МАТЕРЬ", "МАШИНА", "МЕТАЛЛ", "МИНУТА", "МНЕНИЕ", "МОДЕЛЬ", "МОЛОКО", "МОМЕНТ", "МУЗЫКА", "НАЧАЛО", "НЕДЕЛЯ", "НОЯБРЬ", "ОБЪЕКТ",
-"ОГНИВО", "ОГНИЩЕ", "ОГОВОР", "ОДЕЖДА", "ОПЛАТА", "ОРБИТА", "ОРУЖИЕ", "ОСНОВА", "ОСТРОВ", "ОФИЦЕР", "ОХРАНА", "ОЦЕНКА", "ОШИБКА", "ПАЛАТА", "ПАМЯТЬ", "ПАРЕНЬ", "ПАРТИЯ", "ПЕНСИЯ",
-"ПЕРИОД", "ПЕЧАТЬ", "ПИСЬМО", "ПЛАТЬЕ", "ПОБЕДА", "ПОДХОД", "ПОЛОСА", "ПОЛЬЗА", "ПОМОЩЬ", "ПОТЕРЯ", "ПОЭЗИЯ", "ПРАВДА", "ПРЕДЕЛ", "ПРЕМИЯ", "ПРИКАЗ", "ПРИЛИВ", "ПРИЛОВ", "ПРИМЕР",
-"ПРОЕКТ", "РАБОТА", "РАЗМЕР", "РАКЕТА", "РАСХОД", "РАСЧЕТ", "РЕБЯТА", "РЕГИОН", "РЕМОНТ", "РЕСУРС", "РОДИНА", "СДЕЛКА", "СЕРДЦЕ", "СЕСТРА", "СИВУХА", "СИГАРА", "СИГНАЛ", "СКАЗКА",
-"СЛУЖБА", "СЛУЧАЙ", "СМЕРТЬ", "СОБАКА", "СОЛДАТ", "СОЛНЦЕ", "СОСТАВ", "СПИСОК", "СПОСОБ", "СТАВКА", "СТАКАН", "СТАРИК", "СТАТУС", "СТАТЬЯ", "СТЕКЛО", "СТОЛИК", "СТРАНА", "СТРОКА",
-"СУДЬБА", "СУЕТНЯ", "СУИЦИД", "ТАЛАНТ", "ТЕОРИЯ", "ТИШИНА", "ТРОФЕЙ", "ТРОХЕЙ", "ТРУБАЧ", "ТРУБКА", "ТЫСЯЧА", "ТЮРЬМА", "УГРОЗА", "УЛЫБКА", "УСИЛИЕ", "УСЛУГА", "УЧЕНИК", "УЧЕНЫЙ",
-"ФАКТОР", "ФИГУРА", "ФИЛИАЛ", "ФИЛЛЕР", "ХОЗЯИН", "ЦВЕТОК", "ЦЕМЕНТ", "ЦЕНЗОР", "ЦЕННИК", "ЧТЕНИЕ", "ШАЙТАН", "ШАЛАВА", "ЭПИДОТ", "ЭПИЗОД", "ЭПИЛОГ", "ЭПИТЕТ", "ЭФФЕКТ", "ЯБЛОКО",
-"ЯНВАРЬ", "ЯСТВИЕ", "ЯСТРЕБ"],
-            7: ["АВТОБУС", "АВТОМАТ", "АППАРАТ", "БАБУШКА", "БОЛЕЗНЬ", "БОЛЬНОЙ", "БУДУЩЕЕ", "БУТЫЛКА", "ВАРИАНТ", "ВЕРШИНА", "ВЛИЯНИЕ",
-"ВОЗРАСТ", "ВОСТОРГ", "ВСТРЕЧА", "ГЕНЕРАЛ", "ГЛАВНОЕ", "ГЛУБИНА", "ГОСПОДЬ", "ГРАНИЦА", "ДЕВОЧКА", "ДЕВУШКА", "ДЕКАБРЬ", "ДЕПУТАТ", "ДЕРЕВНЯ", "ДЕСЯТОК", "ДЕТСТВО", "ДОГОВОР",
-"ДЫХАНИЕ", "ЕДИНИЦА", "ЖЕЛАНИЕ", "ЖЕНЩИНА", "ЗАНЯТИЕ", "ЗАПИСКА", "ЗАТРАТА", "ЗЕРКАЛО", "ЗРИТЕЛЬ", "ИЗДАНИЕ", "ИНЖЕНЕР", "ИНТЕРЕС", "ИСТОРИЯ", "КАБИНЕТ", "КАПИТАЛ", "КАПИТАН",
-"КАРТИНА", "КОЛЛЕГА", "КОМАНДА", "КОМИТЕТ", "КОМНАТА", "КОНКУРС", "КОНТАКТ", "КОНЦЕРТ", "КОРАБЛЬ", "КОРИДОР", "КРАСОТА", "КРОВАТЬ", "МАГАЗИН", "МАЛЬЧИК", "МАСШТАБ", "МИЛИЦИЯ",
-"МИЛЛИОН", "МИНИСТР", "МОСКВИЧ", "МУЖЧИНА", "НАДЕЖДА", "НАЛИЧИЕ", "НОВОСТЬ", "ОБЛАСТЬ", "ОБОРОНА", "ОБРАЗЕЦ", "ОБЩЕНИЕ", "ОКТЯБРЬ", "ОСТАТОК", "ОТЛИЧИЕ", "ОТРАСЛЬ", "ОЧЕРЕДЬ",
-"ПАРТНЕР", "ПЕРЕВОД", "ПЕРЕХОД", "ПЛОЩАДЬ", "ПОВОРОТ", "ПОДАРОК", "ПОДРУГА", "ПОДЪЕЗД", "ПОЕЗДКА", "ПОЗИЦИЯ", "ПОНЯТИЕ", "ПОПЫТКА", "ПОРТРЕТ", "ПОРЯДОК", "ПОСЕЛОК", "ПОСТЕЛЬ",
-"ПОТОЛОК", "ПРАВИЛО", "ПРЕДМЕТ", "ПРИЗНАК", "ПРИНЦИП", "ПРИРОДА", "ПРИЧИНА", "ПРОДАЖА", "ПРОДУКТ", "ПРОСЬБА", "ПРОЦЕНТ", "ПРОЦЕСС", "ПРОШЛОЕ", "ПУБЛИКА", "РАБОЧИЙ", "РАДОСТЬ",
-"РАЗНИЦА", "РАССКАЗ", "РЕАКЦИЯ", "РЕБЕНОК", "РЕКЛАМА", "РЕФОРМА", "РЕШЕНИЕ", "РИСУНОК", "РУССКИЙ", "САМОЛЕТ", "СВОБОДА", "СЕКУНДА", "СИСТЕМА", "СОБЫТИЕ", "СОВЕСТЬ", "СТАНЦИЯ",
-"СТАРУХА", "СТЕПЕНЬ", "СТОЛИЦА", "СТОРОНА", "СТРАСТЬ", "СТУДЕНТ", "СУБЪЕКТ", "СЧАСТЬЕ", "ТАБЛИЦА", "ТЕЛЕФОН", "ТЕМНОТА", "ТЕХНИКА", "ТЕЧЕНИЕ", "ТОВАРИЩ", "УРОВЕНЬ", "УСЛОВИЕ",
-"УЧАСТИЕ", "УЧАСТОК", "УЧИТЕЛЬ", "ФАМИЛИЯ", "ФЕВРАЛЬ", "ФОРМУЛА", "ФУНКЦИЯ", "ХОЗЯЙКА", "ЦЕРКОВЬ", "ЧЕЛОВЕК", "ЧУВСТВО", "ЭКСПЕРТ", "ЭЛЕМЕНТ", "ЭНЕРГИЯ", "ЯВЛЕНИЕ"],
-            8: ["АКАДЕМИЯ", "БОЛЬНИЦА", "ВЕЛИЧИНА", "ВЕЩЕСТВО", "ВЛАДЕЛЕЦ", "ВНИМАНИЕ", "ВОДИТЕЛЬ", "ВЫСТАВКА", "ГОСПОДИН", "ДАВЛЕНИЕ",
-"ДВИЖЕНИЕ", "ДЕЙСТВИЕ", "ДИРЕКТОР", "ДОКУМЕНТ", "ЖИВОТНОЕ", "ЗАРПЛАТА", "ЗДОРОВЬЕ", "ЗНАКОМЫЙ", "ЗНАЧЕНИЕ", "ИЗВЕСТИЕ", "ИЗУЧЕНИЕ", "ИНСТИТУТ", "ИСТОЧНИК", "КАНДИДАТ", "КАЧЕСТВО",
-"КВАРТИРА", "КИЛОМЕТР", "КОМАНДИР", "КОМИССИЯ", "КОМПАНИЯ", "КОМПЛЕКС", "КОНТРОЛЬ", "КОНФЛИКТ", "КУЛЬТУРА", "ЛЕСТНИЦА", "ЛИЧНОСТЬ", "МАТЕРИАЛ", "МЕХАНИЗМ", "МОЛОДЕЖЬ", "МОЩНОСТЬ",
-"НАЗВАНИЕ", "ОБУЧЕНИЕ", "ОБЩЕСТВО", "ОЖИДАНИЕ", "ОПЕРАЦИЯ", "ОПИСАНИЕ", "ОРГАНИЗМ", "ОСНОВНОЕ", "ОТКРЫТИЕ", "ОЩУЩЕНИЕ", "ПАМЯТНИК", "ПАРАМЕТР", "ПЕРЕДАЧА", "ПИСАТЕЛЬ", "ПИСТОЛЕТ",
-"ПЛОЩАДКА", "ПОЛИТИКА", "ПОЛОВИНА", "ПОМОЩНИК", "ПРАЗДНИК", "ПРАКТИКА", "ПРЕПАРАТ", "ПРИНЯТИЕ", "ПРИЯТЕЛЬ", "ПРОБЛЕМА", "ПРОВЕРКА", "ПРОКУРОР", "РАБОТНИК", "РАЗВИТИЕ", "РАЗГОВОР",
-"РАСТЕНИЕ", "РЕДАКТОР", "РЕДАКЦИЯ", "РЕЖИССЕР", "РЕСТОРАН", "РОДИТЕЛЬ", "РОЖДЕНИЕ", "СВЕДЕНИЕ", "СВОЙСТВО", "СЕНТЯБРЬ", "СЕРЕДИНА", "СИГАРЕТА", "СИТУАЦИЯ", "СКОРОСТЬ", "СНИЖЕНИЕ",
-"СОБРАНИЕ", "СОЗДАНИЕ", "СОЗНАНИЕ", "СОМНЕНИЕ", "СРЕДСТВО", "СТРАНИЦА", "СУЩЕСТВО", "СУЩНОСТЬ", "ТОРГОВЛЯ", "ТРАДИЦИЯ", "УБИЙСТВО", "УКАЗАНИЕ", "УЧАСТНИК", "ХАРАКТЕР", "ХУДОЖНИК",
-"ЦЕННОСТЬ", "ЧИНОВНИК", "ЧИТАТЕЛЬ"],
-            9: ["АТМОСФЕРА", "ВЫРАЖЕНИЕ", "ГОСТИНИЦА", "ГРАЖДАНИН", "ДВИГАТЕЛЬ", "ДОЛЖНОСТЬ", "ЖУРНАЛИСТ", "ЗАСЕДАНИЕ", "ЗАЯВЛЕНИЕ",
-"ИЗМЕНЕНИЕ", "ИМУЩЕСТВО", "ИСКУССТВО", "ИСПЫТАНИЕ", "КАТЕГОРИЯ", "КОЛЛЕКТИВ", "КОММУНИСТ", "КОМПЬЮТЕР", "КОНЦЕПЦИЯ", "ЛЕЙТЕНАНТ", "МАЛЬЧИШКА", "МГНОВЕНИЕ", "МНОЖЕСТВО", "МОНАСТЫРЬ",
-"НАРУШЕНИЕ", "НАСЕЛЕНИЕ", "НАЧАЛЬНИК", "ОБРАБОТКА", "ОБРАЩЕНИЕ", "ОКОНЧАНИЕ", "ОПАСНОСТЬ", "ОСНОВАНИЕ", "ОТДЕЛЕНИЕ", "ОТНОШЕНИЕ", "ПОВЕДЕНИЕ", "ПОВЫШЕНИЕ", "ПОДДЕРЖКА", "ПОКОЛЕНИЕ",
-"ПОЛКОВНИК", "ПОЛОЖЕНИЕ", "ПОЛУЧЕНИЕ", "ПОМЕЩЕНИЕ", "ПОНИМАНИЕ", "ПОЯВЛЕНИЕ", "ПРЕЗИДЕНТ", "ПРИЗНАНИЕ", "ПРОГРАММА", "ПРОДУКЦИЯ", "ПРОТИВНИК", "ПРОФЕССИЯ", "ПРОФЕССОР", "ПРОЦЕДУРА",
-"РЕВОЛЮЦИЯ", "РЕЗУЛЬТАТ", "СВИДЕТЕЛЬ", "СЕКРЕТАРЬ", "СЛЕДСТВИЕ", "СОЖАЛЕНИЕ", "СООБЩЕНИЕ", "СОСТОЯНИЕ", "СОТРУДНИК", "СОЧИНЕНИЕ", "СПЕКТАКЛЬ", "СРАВНЕНИЕ", "СТОИМОСТЬ", "СТРУКТУРА",
-"ТЕЛЕВИЗОР", "ТЕНДЕНЦИЯ", "ТРАНСПОРТ", "УДИВЛЕНИЕ", "УСТАНОВКА", "ФЕДЕРАЦИЯ", "ФИЛОСОФИЯ", "ХОЗЯЙСТВО", "ЧАСТНОСТЬ", "ЧЕМПИОНАТ", "ЭКОНОМИКА"],
-            10: ["АВТОМОБИЛЬ", "АКТИВНОСТЬ", "АМЕРИКАНЕЦ", "БИБЛИОТЕКА", "ВОСПИТАНИЕ", "ВЫПОЛНЕНИЕ", "ГУБЕРНАТОР", "ДОСТИЖЕНИЕ", "ЗАКЛЮЧЕНИЕ",
-"ИНИЦИАТИВА", "ИНСТРУМЕНТ", "ИНФОРМАЦИЯ", "ИСКЛЮЧЕНИЕ", "ИСПОЛНЕНИЕ", "КОЛИЧЕСТВО", "ЛИТЕРАТУРА", "НАБЛЮДЕНИЕ", "НАЗНАЧЕНИЕ", "НАСТРОЕНИЕ", "НАЧАЛЬСТВО", "НЕДОСТАТОК", "ОБСТАНОВКА",
-"ОБЪЯСНЕНИЕ", "ОТСУТСТВИЕ", "ПЕРЕГОВОРЫ", "ПОДГОТОВКА", "ПОКАЗАТЕЛЬ", "ПОКУПАТЕЛЬ", "ПРИМЕНЕНИЕ", "ПРОВЕДЕНИЕ", "ПСИХОЛОГИЯ", "РАЗРАБОТКА", "РАЗРЕШЕНИЕ", "РАССТОЯНИЕ", "РЕАЛИЗАЦИЯ",
-"РЕАЛЬНОСТЬ", "РЕСПУБЛИКА", "СОГЛАШЕНИЕ", "СОДЕРЖАНИЕ", "СОЕДИНЕНИЕ", "СПЕЦИАЛИСТ", "ТВОРЧЕСТВО", "ТЕРРИТОРИЯ", "ТЕХНОЛОГИЯ", "ТРЕБОВАНИЕ", "УВЕЛИЧЕНИЕ", "УПРАВЛЕНИЕ", "УСТРОЙСТВО",
-"УЧРЕЖДЕНИЕ", "ФОТОГРАФИЯ"],
-            11: ["БОЛЬШИНСТВО", "ВОЗВРАЩЕНИЕ", "ВОЗДЕЙСТВИЕ", "ВОЗМОЖНОСТЬ", "ВПЕЧАТЛЕНИЕ", "ВЫСТУПЛЕНИЕ", "ГОСУДАРСТВО", "ДОСТОИНСТВО",
-"ЗАВИСИМОСТЬ", "ЗАМЕСТИТЕЛЬ", "ИЗОБРАЖЕНИЕ", "КОНСТРУКЦИЯ", "КОНФЕРЕНЦИЯ", "МЕРОПРИЯТИЕ", "НАПРАВЛЕНИЕ", "ОБЕСПЕЧЕНИЕ", "ОБРАЗОВАНИЕ", "ОБЪЕДИНЕНИЕ", "ОБЯЗАННОСТЬ", "ОПРЕДЕЛЕНИЕ",
-"ОРГАНИЗАЦИЯ", "ОСОБЕННОСТЬ", "ПЕРСПЕКТИВА", "ПОВЕРХНОСТЬ", "ПОСЛЕДСТВИЕ", "ПОТРЕБНОСТЬ", "ПРЕДЛОЖЕНИЕ", "ПРЕДПРИЯТИЕ", "ПРИСУТСТВИЕ", "РОДСТВЕННИК", "РУКОВОДСТВО", "СЛЕДОВАТЕЛЬ",
-"СПОСОБНОСТЬ", "ТЕМПЕРАТУРА", "УНИВЕРСИТЕТ", "ЭКСПЕРИМЕНТ"]
+    document.addEventListener('DOMContentLoaded', () => {
+        // --- DOM Elements ---
+        const screens = {
+            mainMenu: document.getElementById('main-menu'),
+            game: document.getElementById('game-screen'),
+            pause: document.getElementById('pause-modal'),
+            stats: document.getElementById('stats-screen'),
+            rules: document.getElementById('rules-screen'),
+            levelComplete: document.getElementById('level-complete-modal'),
         };
-        const foundColors = [ { bg: '#f39c12' }, { bg: '#2ecc71' }, { bg: '#3498db' }, { bg: '#9b59b6' }, { bg: '#e74c3c' }, { bg: '#1abc9c' }, { bg: '#f1c40f' }, { bg: '#27ae60' }, { bg: '#2980b9' }, { bg: '#8e44ad' } ];
-        const state = { gridSize: 0, words: [], wordCellCoords: new Map(), grid: [], foundWords: [], isSelecting: false, selectedCells: [], hintedWord: null, hintedLetterIndex: 0, };
-        const dom = { mainMenu: document.getElementById('main-menu'), gameScreen: document.getElementById('game-screen'), gridContainer: document.getElementById('grid-container'), levelDisplay: document.getElementById('level-display'), themeToggle: document.getElementById('theme-toggle'), winModal: document.getElementById('win-modal'), pauseModal: document.getElementById('pause-modal'), rulesModal: document.getElementById('rules-modal'), pauseButton: document.getElementById('pause-button'), hintButton: document.getElementById('hint-button'), nextLevelButton: document.getElementById('next-level-button'), resumeButton: document.getElementById('resume-button'), winMenuButton: document.getElementById('win-menu-button'), pauseMenuButton: document.getElementById('pause-menu-button'), rulesButton: document.getElementById('rules-button'), closeRulesButton: document.getElementById('close-rules-button'), };
+        const buttons = {
+            stats: document.getElementById('stats-button'),
+            statsBack: document.getElementById('stats-back-button'),
+            rulesBack: document.getElementById('rules-back-button'),
+            pause: document.getElementById('pause-button'),
+            resume: document.getElementById('resume-button'),
+            restart: document.getElementById('restart-button'),
+            mainMenuPause: document.getElementById('main-menu-button-pause'),
+            resetStats: document.getElementById('reset-stats-button'),
+            nextLevel: document.getElementById('next-level-button'),
+            hint: document.getElementById('hint-button'),
+        };
+        const displays = {
+            level: document.getElementById('level-display'),
+            target: document.getElementById('target-display'),
+            currentValue: document.getElementById('current-value-display'),
+            completedLevelNum: document.getElementById('completed-level-num'),
+        };
+        const grid = document.getElementById('grid');
+        const gridContainer = document.getElementById('grid-container');
+        const pathContainer = document.getElementById('path-container');
+        const levelCompleteContent = document.getElementById('level-complete-content');
+        const difficultySelectionContainer = document.getElementById('difficulty-selection');
+        const themeSwitch = document.getElementById('theme-switch');
+        
+        // --- Game Config ---
+        const difficulties = {
+            '4x4': { size: 4, unlock: 0, numRange: 10 },
+            '5x5': { size: 5, unlock: 25, numRange: 20 },
+            '6x6': { size: 6, unlock: 25, numRange: 30 },
+            '7x7': { size: 7, unlock: 25, numRange: 40 },
+            '8x8': { size: 8, unlock: 25, numRange: 50 },
+        };
+        const difficultyOrder = ['4x4', '5x5', '6x6', '7x7', '8x8'];
 
-        async function saveGameData() {
-            if (!okParams) return localStorage.setItem('fillwords_guest_save', JSON.stringify(gameState));
-            const dataToSave = JSON.stringify(gameState);
-            FAPI.Client.setVars('fillwords_save', dataToSave);
-        }
+        // --- Game State ---
+        let gameState = {
+            difficulty: '4x4',
+            gridSize: 4,
+            targetValue: 0,
+            currentValue: 0,
+            gridData: [],
+            solutionPath: [],
+            isDrawing: false,
+            currentPath: [],
+            isPaused: false,
+            hintStep: 0,
+        };
+        let rulesAnimationTimer = null;
 
-        function loadGameData() {
-            return new Promise((resolve) => {
-                if (!okParams) {
-                    const guestData = localStorage.getItem('fillwords_guest_save');
-                    if (guestData) gameState = { ...gameState, ...JSON.parse(guestData) };
-                    resolve();
+        // --- Stats State ---
+        let gameStats = {};
+
+        // --- Utility Functions ---
+        const showScreen = (screenId) => {
+            Object.values(screens).forEach(s => s.classList.remove('active'));
+            if (screens[screenId]) screens[screenId].classList.add('active');
+            
+            // Clear rules animation when leaving the screen
+            if (screenId !== 'rules' && rulesAnimationTimer) {
+                clearTimeout(rulesAnimationTimer);
+                rulesAnimationTimer = null;
+            }
+        };
+
+        const saveStats = () => localStorage.setItem('mathMatrixStats_v4', JSON.stringify(gameStats));
+
+        const loadStats = () => {
+            const saved = localStorage.getItem('mathMatrixStats_v4');
+            if (saved) {
+                gameStats = JSON.parse(saved);
+                difficultyOrder.forEach(key => {
+                    if (!gameStats[key]) {
+                        gameStats[key] = { levelsCompleted: 0 };
+                    }
+                });
+            } else {
+                difficultyOrder.forEach(key => {
+                    gameStats[key] = { levelsCompleted: 0 };
+                });
+            }
+        };
+
+        const resetStats = () => {
+            if (confirm('Вы уверены, что хотите сбросить всю статистику? Это действие необратимо.')) {
+                difficultyOrder.forEach(key => {
+                    gameStats[key] = { levelsCompleted: 0 };
+                });
+                saveStats();
+                updateMainMenu();
+                updateStatsScreen();
+            }
+        };
+
+        // --- Theme Management ---
+        const applyTheme = (isLight) => {
+            document.documentElement.classList.toggle('light', isLight);
+            themeSwitch.checked = isLight;
+        };
+
+        const toggleTheme = () => {
+            const isLight = themeSwitch.checked;
+            applyTheme(isLight);
+            localStorage.setItem('mathMatrixTheme', isLight ? 'light' : 'dark');
+        };
+
+        // --- Main Menu ---
+        const updateMainMenu = () => {
+            difficultySelectionContainer.innerHTML = '';
+            let previousDifficultyKey = null;
+
+            const allButtons = [...difficultyOrder, 'rules'];
+
+            allButtons.forEach(key => {
+                const button = document.createElement('button');
+                button.classList.add('menu-btn');
+
+                if(key === 'rules') {
+                    button.id = 'rules-button';
+                    button.className += ' p-4 rounded-xl font-bold text-xl shadow-lg transform hover:scale-105';
+                    button.style.backgroundColor = 'var(--bg-tertiary)';
+                    button.style.color = 'var(--text-primary)';
+                    button.innerHTML = 'Правила';
+                    difficultySelectionContainer.appendChild(button);
                     return;
                 }
-                FAPI.Client.getVars('fillwords_save', (status, data, error) => {
-                    if (status === 'ok' && data) {
-                        try {
-                            const loadedData = JSON.parse(data);
-                            if (loadedData) {
-                                gameState.theme = loadedData.theme || 'light';
-                                gameState.levels = { ...gameState.levels, ...loadedData.levels };
-                            }
-                        } catch(e) { console.error('Error parsing save data', e); }
-                    } else if (error) {
-                        console.error('OK GetVars Error:', error);
+
+                const config = difficulties[key];
+                button.dataset.difficulty = key;
+                
+                const isUnlocked = previousDifficultyKey === null || gameStats[previousDifficultyKey].levelsCompleted >= config.unlock;
+                
+                if(isUnlocked) {
+                    button.className += ' p-4 rounded-xl text-white font-bold text-xl shadow-lg transform hover:scale-105';
+                    button.style.backgroundColor = 'var(--bg-interactive)';
+                    button.innerHTML = key;
+                } else {
+                    button.disabled = true;
+                    button.className += ' p-4 rounded-xl font-bold text-xl shadow-md';
+                    button.style.backgroundColor = 'var(--bg-tertiary)';
+                    button.style.color = 'var(--text-secondary)';
+                    const completed = gameStats[previousDifficultyKey].levelsCompleted;
+                    const needed = config.unlock;
+                    button.innerHTML = `
+                        <div class="flex flex-col items-center justify-center">
+                            <span>${key}</span>
+                            <div class="flex items-center text-sm font-medium mt-1">
+                                <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 1a4.5 4.5 0 00-4.5 4.5V9H5a2 2 0 00-2 2v6a2 2 0 002 2h10a2 2 0 002-2v-6a2 2 0 00-2-2h-.5V5.5A4.5 4.5 0 0010 1zm3 8V5.5a3 3 0 10-6 0V9h6z" clip-rule="evenodd"></path></svg>
+                                <span>${completed}/${needed}</span>
+                            </div>
+                        </div>`;
+                }
+                difficultySelectionContainer.appendChild(button);
+                previousDifficultyKey = key;
+            });
+        };
+        
+        // --- Stats Screen ---
+        const updateStatsScreen = () => {
+            const tableBody = document.getElementById('stats-table-body');
+            tableBody.innerHTML = '';
+            difficultyOrder.forEach(key => {
+                const stats = gameStats[key];
+                const row = document.createElement('tr');
+                row.className = 'border-b border-gray-200/10';
+                row.innerHTML = `
+                    <td class="p-3 font-semibold">${key}</td>
+                    <td class="p-3 text-right font-mono text-xl" style="color: var(--text-accent);">${stats.levelsCompleted}</td>
+                `;
+                tableBody.appendChild(row);
+            });
+        };
+        
+        // --- Rules Screen ---
+        function showRulesScreen() {
+            showScreen('rules');
+            const rulesGrid = document.getElementById('rules-grid');
+            rulesGrid.innerHTML = '';
+            const example = [
+                {val: 5, type: 'number'}, {val: '×', type: 'operator'}, {val: 7, type: 'number'},
+                {val: '+', type: 'operator'}, {val: 4, type: 'number'}, {val: '−', type: 'operator'},
+                {val: 9, type: 'number'}, {val: '÷', type: 'operator'}, {val: 5, type: 'number'},
+            ];
+            const path = [0, 1, 4, 5, 8]; // 5 * 4 - 5 = 15
+            
+            example.forEach((cell, index) => {
+                const tile = document.createElement('div');
+                tile.className = 'tile w-full h-full flex items-center justify-center rounded-lg';
+                if(cell.type === 'operator') {
+                    tile.classList.add('operator');
+                    tile.innerHTML = cell.val === '*' ? '&times;' : cell.val;
+                } else {
+                    tile.textContent = cell.val;
+                }
+                tile.dataset.index = index;
+                rulesGrid.appendChild(tile);
+            });
+
+            let step = 0;
+            const animateRulesHint = () => {
+                const tiles = rulesGrid.querySelectorAll('.tile');
+                if (step >= path.length) {
+                    rulesAnimationTimer = setTimeout(() => {
+                        tiles.forEach(t => t.classList.remove('hint-outline'));
+                        step = 0;
+                        rulesAnimationTimer = setTimeout(animateRulesHint, 500);
+                    }, 2000);
+                    return;
+                }
+                const tileIndex = path[step];
+                const tile = rulesGrid.querySelector(`[data-index='${tileIndex}']`);
+                if(tile) tile.classList.add('hint-outline');
+                step++;
+                rulesAnimationTimer = setTimeout(animateRulesHint, 400);
+            };
+            if(rulesAnimationTimer) clearTimeout(rulesAnimationTimer);
+            animateRulesHint();
+        }
+
+        // --- Level Generation ---
+        const generateLevel = () => {
+            const config = difficulties[gameState.difficulty];
+            const size = config.size;
+            gameState.gridSize = size;
+            let gridData, solutionPath, targetValue;
+            
+            let attempts = 0;
+            while(attempts < 50) {
+                const result = buildGuaranteedLevel(size, config.numRange);
+                if(result) {
+                    ({ gridData, solutionPath, targetValue } = result);
+                    break;
+                }
+                attempts++;
+            }
+
+            if(!gridData) {
+                alert("Не удалось сгенерировать уровень. Пожалуйста, попробуйте снова.");
+                showScreen('mainMenu');
+                return;
+            }
+
+            gameState.gridData = gridData;
+            gameState.solutionPath = solutionPath;
+            gameState.targetValue = targetValue;
+        };
+
+        function buildGuaranteedLevel(size, numRange) {
+            let gridData = Array(size).fill(null).map(() => Array(size).fill(null));
+            const pathLength = Math.floor(size / 2) + Math.floor(Math.random() * (size / 2));
+            const operators = ['+', '-', '*', '/'];
+
+            let numberCells = [], operatorCells = [];
+            for(let r = 0; r < size; r++) {
+                for(let c = 0; c < size; c++) {
+                    if((r + c) % 2 === 0) numberCells.push({r, c});
+                    else operatorCells.push({r, c});
+                }
+            }
+
+            let pathCoords = [];
+            let currentVal;
+            let solutionPath = [];
+
+            let startCell = numberCells.splice(Math.floor(Math.random() * numberCells.length), 1)[0];
+            pathCoords.push(startCell);
+            
+            let startValue = Math.floor(Math.random() * numRange) + 1;
+            currentVal = startValue;
+            solutionPath.push({ type: 'number', value: startValue, row: startCell.r, col: startCell.c });
+
+            for (let i = 0; i < pathLength; i++) {
+                let possibleOps = findAdjacent(pathCoords[pathCoords.length-1], operatorCells);
+                if(possibleOps.length === 0) break;
+                let opCell = possibleOps.splice(Math.floor(Math.random() * possibleOps.length), 1)[0];
+                operatorCells = operatorCells.filter(c => c.r !== opCell.r || c.c !== opCell.c);
+                pathCoords.push(opCell);
+                
+                let possibleNums = findAdjacent(opCell, numberCells);
+                if(possibleNums.length === 0) break;
+                let numCell = possibleNums.splice(Math.floor(Math.random() * possibleNums.length), 1)[0];
+                numberCells = numberCells.filter(c => c.r !== numCell.r || c.c !== numCell.c);
+                pathCoords.push(numCell);
+
+                let op, num;
+                let calculationOk = false;
+                let opAttempts = 0;
+                while(!calculationOk && opAttempts < 20) {
+                    opAttempts++;
+                    op = operators[Math.floor(Math.random() * operators.length)];
+                    num = Math.floor(Math.random() * numRange) + 1;
+                    
+                    let tempVal = currentVal;
+                    if (op === '/') {
+                        if (tempVal % num !== 0) continue;
+                    } else if (op === '-') {
+                        if (tempVal - num <= 0) continue;
                     }
-                    resolve();
+                    calculationOk = true;
+                    currentVal = eval(`${tempVal} ${op} ${num}`);
+                }
+                if (!calculationOk) return null;
+
+                solutionPath.push({ type: 'operator', value: op, row: opCell.r, col: opCell.c });
+                solutionPath.push({ type: 'number', value: num, row: numCell.r, col: numCell.c });
+            }
+
+            if(solutionPath.length < 3) return null;
+
+            solutionPath.forEach(p => {
+                gridData[p.row][p.col] = { type: p.type, value: p.value, row: p.row, col: p.col };
+            });
+
+            numberCells.forEach(cell => {
+                gridData[cell.r][cell.c] = { type: 'number', value: Math.floor(Math.random() * numRange) + 1, row: cell.r, col: cell.c };
+            });
+            operatorCells.forEach(cell => {
+                gridData[cell.r][cell.c] = { type: 'operator', value: operators[Math.floor(Math.random() * 3)], row: cell.r, col: cell.c };
+            });
+
+            return { gridData, solutionPath, targetValue: currentVal };
+        }
+
+        function findAdjacent({r, c}, cellList) {
+            return cellList.filter(cell => Math.abs(cell.r - r) + Math.abs(cell.c - c) === 1);
+        }
+
+        // --- Drawing Functions ---
+        const drawGrid = () => {
+            grid.innerHTML = '';
+            grid.style.gridTemplateColumns = `repeat(${gameState.gridSize}, 1fr)`;
+            grid.style.gridTemplateRows = `repeat(${gameState.gridSize}, 1fr)`;
+
+            gameState.gridData.forEach((row, r) => {
+                row.forEach((cell, c) => {
+                    const tile = document.createElement('div');
+                    tile.dataset.row = r;
+                    tile.dataset.col = c;
+                    tile.dataset.value = cell.value;
+                    tile.dataset.type = cell.type;
+                    
+                    let tileClasses = 'tile w-full h-full flex items-center justify-center rounded-lg text-xl md:text-2xl font-bold cursor-pointer';
+                    if (cell.type === 'operator') {
+                        tileClasses += ' operator';
+                        tile.innerHTML = cell.value === '*' ? '&times;' : cell.value.replace('-', '−');
+                    } else {
+                        tile.textContent = cell.value;
+                    }
+                    tile.className = tileClasses;
+                    grid.appendChild(tile);
                 });
             });
-        }
-        
-        function showInterstitialAd() {
-            if (!FAPI) return;
-            levelsPlayedSinceAd++;
-            if (levelsPlayedSinceAd >= INTERSTITIAL_AD_FREQUENCY) {
-                FAPI.UI.showAd();
-                levelsPlayedSinceAd = 0;
-            }
-        }
-        
-        function initGameUI() {
-            document.body.dataset.theme = gameState.theme;
-            updateMainMenu();
-            setupEventListeners();
-        }
+        };
 
-        function setupEventListeners() {
-            document.querySelectorAll('.menu-button').forEach(b => b.addEventListener('click', () => startGame(parseInt(b.dataset.size))));
-            dom.themeToggle.addEventListener('click', toggleTheme);
-            dom.pauseButton.addEventListener('click', () => showModal(dom.pauseModal));
-            dom.resumeButton.addEventListener('click', () => hideModal(dom.pauseModal));
-            dom.winMenuButton.addEventListener('click', showMainMenu);
-            dom.pauseMenuButton.addEventListener('click', showMainMenu);
-            dom.hintButton.addEventListener('click', handleHintClick);
-            dom.nextLevelButton.addEventListener('click', nextLevel);
-            dom.rulesButton.addEventListener('click', () => showModal(dom.rulesModal));
-            dom.closeRulesButton.addEventListener('click', () => hideModal(dom.rulesModal));
-            dom.gridContainer.addEventListener('mousedown', handleMouseDown);
-            dom.gridContainer.addEventListener('touchstart', handleTouchStart, { passive: false });
-            document.addEventListener('gesturestart', e => e.preventDefault());
-            document.addEventListener('contextmenu', event => event.preventDefault());
-        }
-
-        function updateMainMenu() {
-            const gridSizes = [5, 6, 7, 8];
-            gridSizes.forEach((size, index) => {
-                const level = gameState.levels[size] || 1;
-                document.getElementById(`level-info-${size}`).textContent = `Уровень: ${level}`;
-                const button = document.querySelector(`.menu-button[data-size="${size}"]`);
-                if (index > 0) {
-                    const prevLevel = gameState.levels[gridSizes[index - 1]] || 1;
-                    const isLocked = prevLevel < LEVELS_TO_UNLOCK;
-                    button.disabled = isLocked;
-                    button.classList.toggle('locked', isLocked);
-                    if (isLocked) document.getElementById(`unlock-progress-${size}`).textContent = `${prevLevel} / ${LEVELS_TO_UNLOCK}`;
-                }
-            });
-        }
-        
-        function toggleTheme() {
-            gameState.theme = document.body.dataset.theme === 'light' ? 'dark' : 'light';
-            document.body.dataset.theme = gameState.theme;
-            saveGameData();
-        }
-
-        function showScreen(screenId) {
-            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-            document.getElementById(screenId).classList.add('active');
-            if (screenId === 'game-screen') {
-                window.addEventListener('mousemove', handleMouseMove); window.addEventListener('mouseup', handleMouseUp);
-                window.addEventListener('touchmove', handleTouchMove, { passive: false }); window.addEventListener('touchend', handleTouchEnd);
+        const updateDisplay = () => {
+            displays.level.textContent = gameStats[gameState.difficulty].levelsCompleted + 1;
+            displays.target.textContent = gameState.targetValue;
+            displays.currentValue.textContent = gameState.currentValue;
+            
+            const currentValueDisplay = displays.currentValue;
+            if (gameState.currentValue === gameState.targetValue && gameState.currentPath.length >= 3) {
+                currentValueDisplay.style.color = '#4ade80'; // green-400
             } else {
-                window.removeEventListener('mousemove', handleMouseMove); window.removeEventListener('mouseup', handleMouseUp);
-                window.removeEventListener('touchmove', handleTouchMove); window.removeEventListener('touchend', handleTouchEnd);
+                currentValueDisplay.style.color = 'var(--text-primary)';
             }
-        }
-        
-        function startGame(size) {
-            const button = document.querySelector(`.menu-button[data-size="${size}"]`);
-            if (button.disabled) return;
-            state.gridSize = size;
-            showScreen('game-screen');
-            generateLevel();
-        }
+        };
 
-        function showMainMenu() {
-            hideModal(dom.winModal); hideModal(dom.pauseModal);
-            showScreen('main-menu');
+        const drawPath = () => {
+            pathContainer.innerHTML = '';
+            if (gameState.currentPath.length < 2) return;
+            for (let i = 0; i < gameState.currentPath.length - 1; i++) {
+                const startNode = document.querySelector(`[data-row='${gameState.currentPath[i].row}'][data-col='${gameState.currentPath[i].col}']`);
+                const endNode = document.querySelector(`[data-row='${gameState.currentPath[i+1].row}'][data-col='${gameState.currentPath[i+1].col}']`);
+                const startRect = startNode.getBoundingClientRect();
+                const endRect = endNode.getBoundingClientRect();
+                const containerRect = gridContainer.getBoundingClientRect();
+                const startX = startRect.left + startRect.width / 2 - containerRect.left;
+                const startY = startRect.top + startRect.height / 2 - containerRect.top;
+                const endX = endRect.left + endRect.width / 2 - containerRect.left;
+                const endY = endRect.top + endRect.height / 2 - containerRect.top;
+                const angle = Math.atan2(endY - startY, endX - startX) * 180 / Math.PI;
+                const length = Math.sqrt(Math.pow(endX - startX, 2) + Math.pow(endY - startY, 2));
+                const line = document.createElement('div');
+                line.className = 'path-line';
+                line.style.width = `${length}px`;
+                line.style.left = `${startX}px`;
+                line.style.top = `${startY}px`;
+                line.style.transform = `rotate(${angle}deg)`;
+                pathContainer.appendChild(line);
+            }
+        };
+        
+        // --- Game Logic ---
+        const startNewGame = (difficulty) => {
+            gameState.difficulty = difficulty;
+            startLevel();
+            showScreen('game');
+        };
+
+        const startLevel = () => {
+            resetPath();
+            generateLevel();
+            drawGrid();
+            updateDisplay();
+        };
+
+        const levelComplete = () => {
+            gameStats[gameState.difficulty].levelsCompleted++;
+            saveStats();
             updateMainMenu();
-        }
-
-        async function nextLevel() {
-            hideModal(dom.winModal);
-            gameState.levels[state.gridSize]++;
-            await saveGameData();
-            showInterstitialAd();
-            generateLevel();
-        }
-
-        function generateLevel() {
-            resetStateForNewLevel();
-            dom.levelDisplay.textContent = `Уровень ${gameState.levels[state.gridSize]}`;
-            const requiredArea = state.gridSize * state.gridSize;
-            state.words = findWordCombination(requiredArea);
-            if (!state.words) { showToast("Ошибка подбора слов. Попробуйте снова."); showMainMenu(); return; }
-            let success = false; let attempts = 0;
-            while(!success && attempts++ < 200) { state.grid = createEmptyGrid(); state.wordCellCoords.clear(); success = placeWordsOnGrid(); }
-            if(!success) { showToast("Ошибка генерации уровня. Пожалуйста, вернитесь в меню."); showMainMenu(); return; }
-            renderGrid();
-        }
+            
+            displays.completedLevelNum.textContent = gameStats[gameState.difficulty].levelsCompleted;
+            showScreen('levelComplete');
+            levelCompleteContent.classList.remove('scale-0');
+            levelCompleteContent.classList.add('scale-100');
+        };
         
-        const showModal = (modal) => modal.classList.add('active');
-        const hideModal = (modal) => modal.classList.remove('active');
-        const resetStateForNewLevel = () => { Object.assign(state, { foundWords: [], selectedCells: [], hintedWord: null, hintedLetterIndex: 0 }); dom.gridContainer.innerHTML = ''; };
-        const findWordCombination = (targetSum) => { const allWords = Object.values(wordsDB).flat().map(w => w.toLowerCase()); const uniqueWords = [...new Set(allWords)]; uniqueWords.sort(() => Math.random() - 0.5); let result = null; function backtrack(startIndex, currentSum, combination) { if (result) return; if (currentSum === targetSum) { result = [...combination]; return; } if (currentSum > targetSum || startIndex === uniqueWords.length) return; const word = uniqueWords[startIndex]; combination.push(word); backtrack(startIndex + 1, currentSum + word.length, combination); if (result) return; combination.pop(); backtrack(startIndex + 1, currentSum, combination); } backtrack(0, 0, []); return result; };
-        const createEmptyGrid = () => Array.from({ length: state.gridSize }, () => Array(state.gridSize).fill(null));
-        function placeWordsOnGrid() { const sortedWords = [...state.words].sort((a, b) => b.length - a.length); for (const word of sortedWords) { let placed = false; for (let i = 0; i < 150; i++) { const path = findPathForWord(word.length); if (path) { state.wordCellCoords.set(word, path); path.forEach((pos, j) => { state.grid[pos.r][pos.c] = word[j]; }); placed = true; break; } } if (!placed) return false; } return true; }
-        function findPathForWord(length) { const startR = Math.floor(Math.random() * state.gridSize), startC = Math.floor(Math.random() * state.gridSize); const path = []; function backtrack(r, c) { if (path.length === length) return true; if (r < 0 || r >= state.gridSize || c < 0 || c >= state.gridSize || state.grid[r][c] !== null) return false; path.push({ r, c }); state.grid[r][c] = 'temp'; const directions = [[-1, 0], [1, 0], [0, -1], [0, 1]].sort(() => Math.random() - 0.5); for (const [dr, dc] of directions) { if (backtrack(r + dr, c + dc)) { state.grid[r][c] = null; return true; } } path.pop(); state.grid[r][c] = null; return false; } return backtrack(startR, startC) ? path : null; }
-        function renderGrid() { dom.gridContainer.innerHTML = ''; dom.gridContainer.style.gridTemplateColumns = `repeat(${state.gridSize}, 1fr)`; state.grid.forEach((row, r) => { row.forEach((letter, c) => { const cell = document.createElement('div'); cell.className = 'grid-cell'; cell.dataset.r = r; cell.dataset.c = c; cell.textContent = letter; dom.gridContainer.appendChild(cell); }); }); }
-        const getCellFromCoords = ({ clientX, clientY }) => document.elementFromPoint(clientX, clientY);
-        function startSelection(target) { const cell = target.closest('.grid-cell'); if (cell && !cell.classList.contains('found')) { state.isSelecting = true; addCellToSelection(cell); } }
-        function moveSelection(target) { if (!state.isSelecting) return; const cell = target.closest('.grid-cell'); if (cell && !cell.classList.contains('found')) addCellToSelection(cell); }
-        function endSelection() { if (state.isSelecting) { state.isSelecting = false; checkSelectedWord(); } }
-        const handleMouseDown = (e) => startSelection(e.target);
-        const handleMouseMove = (e) => moveSelection(e.target);
-        const handleMouseUp = () => endSelection();
-        const handleTouchStart = (e) => { e.preventDefault(); startSelection(getCellFromCoords(e.touches[0])); };
-        const handleTouchMove = (e) => { e.preventDefault(); moveSelection(getCellFromCoords(e.touches[0])); };
-        const handleTouchEnd = () => endSelection();
-        function addCellToSelection(cellEl) { const r = parseInt(cellEl.dataset.r), c = parseInt(cellEl.dataset.c); if (state.selectedCells.some(cell => cell.r === r && cell.c === c)) return; const lastCell = state.selectedCells[state.selectedCells.length - 1]; if (lastCell && Math.abs(lastCell.r - r) + Math.abs(lastCell.c - c) !== 1) return; state.selectedCells.push({r, c}); updateSelectionLook(); }
-        function checkSelectedWord() { if (state.selectedCells.length === 0) return; const selectedWordStr = state.selectedCells.map(({r, c}) => state.grid[r][c]).join(''); const wordData = state.words.find(w => w === selectedWordStr.toLowerCase()); if (wordData && !state.foundWords.includes(wordData)) { if (wordData === state.hintedWord) clearHint(); state.foundWords.push(wordData); markWordAsFound(wordData); if (state.foundWords.length === state.words.length) setTimeout(() => showModal(dom.winModal), 500); } state.selectedCells = []; updateSelectionLook(); }
-        const updateSelectionLook = () => { document.querySelectorAll('.grid-cell.selected').forEach(c => c.classList.remove('selected')); state.selectedCells.forEach(({r, c}) => { const cellEl = document.querySelector(`.grid-cell[data-r='${r}'][data-c='${c}']`); if(cellEl) cellEl.classList.add('selected'); }); };
-        function markWordAsFound(word) { const colorIndex = (state.foundWords.length - 1) % foundColors.length; const color = foundColors[colorIndex]; const coords = state.wordCellCoords.get(word); coords.forEach(({r, c}) => { const cellEl = document.querySelector(`.grid-cell[data-r='${r}'][data-c='${c}']`); if (cellEl) { cellEl.classList.add('found'); cellEl.style.backgroundColor = color.bg; cellEl.style.color = '#ffffff'; } }); }
-        
-        function showToast(message) {
-            const toast = document.createElement('div');
-            toast.className = 'toast-notification';
-            toast.textContent = message;
-            document.body.appendChild(toast);
-            setTimeout(() => { toast.classList.add('show'); }, 10);
-            setTimeout(() => { toast.classList.remove('show'); toast.addEventListener('transitionend', () => toast.remove()); }, 3000);
+        const goToNextLevel = () => {
+             levelCompleteContent.classList.remove('scale-100');
+             levelCompleteContent.classList.add('scale-0');
+             // Use a short timeout to allow the fade-out animation to play
+             setTimeout(() => {
+                showScreen('game');
+                startLevel();
+             }, 300);
         }
 
-        function handleHintClick() {
-            if (!FAPI) return showToast('Ошибка: SDK не загружен');
-            FAPI.addCallback('sdk.showExtAdResult', (status) => {
-                if (status === 'ok') { grantHint(); } 
-                else { showToast('Просмотрите рекламу до конца'); }
-                FAPI.removeCallback('sdk.showExtAdResult');
-            });
-            FAPI.UI.showLoadedExtAd();
-        }
-        function grantHint() {
-            if (!state.hintedWord) {
-                const unfoundWords = state.words.filter(w => !state.foundWords.includes(w));
-                if (unfoundWords.length === 0) { showToast('Все слова найдены!'); return; }
-                state.hintedWord = unfoundWords[Math.floor(Math.random() * unfoundWords.length)];
-                state.hintedLetterIndex = 0;
-            }
-            if (state.hintedLetterIndex >= state.hintedWord.length) { showToast('Все буквы этого слова уже подсказаны'); return; }
-            state.hintedLetterIndex++;
-            const coords = state.wordCellCoords.get(state.hintedWord);
-            const cellsToAnimate = [];
-            for (let i = 0; i < state.hintedLetterIndex; i++) {
-                const cellEl = document.querySelector(`.grid-cell[data-r='${coords[i].r}'][data-c='${coords[i].c}']`);
-                if (cellEl) cellsToAnimate.push(cellEl);
-            }
-            document.querySelectorAll('.grid-cell.hint').forEach(cell => cell.classList.remove('hint'));
-            setTimeout(() => cellsToAnimate.forEach(cell => cell.classList.add('hint')), 10);
-        }
-        const clearHint = () => { state.hintedWord = null; state.hintedLetterIndex = 0; document.querySelectorAll('.grid-cell.hint').forEach(cell => cell.classList.remove('hint')); };
+        const resetPath = () => {
+            gameState.isDrawing = false;
+            gameState.hintStep = 0;
+            gameState.currentPath = [];
+            gameState.currentValue = 0;
+            document.querySelectorAll('.tile.selected').forEach(t => t.classList.remove('selected'));
+            document.querySelectorAll('.tile.hint-outline').forEach(t => t.classList.remove('hint-outline'));
+            pathContainer.innerHTML = '';
+            updateDisplay();
+        };
 
-        // --- ЗАПУСК ---
-        FAPI_PARAMS = initOKSDK();
-    };
+        const handleInteractionStart = (e) => {
+            if (gameState.isPaused) return;
+            const tile = e.target.closest('.tile');
+            if (tile && tile.dataset.type === 'number') {
+                e.preventDefault();
+                resetPath();
+                gameState.isDrawing = true;
+                const row = parseInt(tile.dataset.row);
+                const col = parseInt(tile.dataset.col);
+                const value = parseInt(tile.dataset.value);
+                
+                gameState.currentPath.push({row, col, value, type: 'number'});
+                gameState.currentValue = value;
+                
+                tile.classList.add('selected');
+                updateDisplay();
+                drawPath();
+            }
+        };
+
+        const handleInteractionMove = (e) => {
+            if (!gameState.isDrawing || gameState.isPaused) return;
+            e.preventDefault();
+            
+            const touch = e.touches ? e.touches[0] : e;
+            const element = document.elementFromPoint(touch.clientX, touch.clientY);
+            const tile = element ? element.closest('.tile') : null;
+
+            if (tile) {
+                const row = parseInt(tile.dataset.row);
+                const col = parseInt(tile.dataset.col);
+                const value = tile.dataset.value;
+                const type = tile.dataset.type;
+
+                const lastTile = gameState.currentPath[gameState.currentPath.length - 1];
+                const isAdjacent = Math.abs(lastTile.row - row) + Math.abs(lastTile.col - col) === 1;
+                const isInPath = gameState.currentPath.some(p => p.row === row && p.col === col);
+
+                if (isAdjacent && !isInPath && type !== lastTile.type) {
+                    gameState.currentPath.push({row, col, value, type});
+                    tile.classList.add('selected');
+                    
+                    if (type === 'number') {
+                        const operator = gameState.currentPath[gameState.currentPath.length - 2].value;
+                        gameState.currentValue = eval(`${gameState.currentValue} ${operator} ${value}`);
+                    }
+                    updateDisplay();
+                    drawPath();
+                }
+            }
+        };
+
+        const handleInteractionEnd = (e) => {
+            if (!gameState.isDrawing || gameState.isPaused) return;
+            e.preventDefault();
+            gameState.isDrawing = false;
+
+            if (gameState.currentValue === gameState.targetValue && gameState.currentPath.length >= 3) {
+                setTimeout(levelComplete, 200);
+            } else {
+                displays.currentValue.style.color = '#f87171'; // red-400
+                setTimeout(resetPath, 800);
+            }
+        };
+
+        const showHint = () => {
+            if (gameState.isDrawing) return;
+            
+            // Clear previous hints
+            document.querySelectorAll('.tile.hint-outline').forEach(t => t.classList.remove('hint-outline'));
+
+            gameState.hintStep++;
+            const tilesToShow = 1 + (gameState.hintStep * 2);
+
+            if (tilesToShow > gameState.solutionPath.length) {
+                gameState.hintStep = 0; // Reset if we've shown the whole path
+            }
+
+            for(let i=0; i < tilesToShow && i < gameState.solutionPath.length; i++) {
+                const tileInfo = gameState.solutionPath[i];
+                const tileElement = document.querySelector(`[data-row='${tileInfo.row}'][data-col='${tileInfo.col}']`);
+                if (tileElement) {
+                   tileElement.classList.add('hint-outline');
+                }
+            }
+        };
+
+        // --- Event Listeners ---
+        difficultySelectionContainer.addEventListener('click', (e) => {
+            const button = e.target.closest('button');
+            if (button && !button.disabled) {
+                if(button.id === 'rules-button') {
+                    showRulesScreen();
+                } else {
+                    startNewGame(button.dataset.difficulty);
+                }
+            }
+        });
+
+        buttons.stats.addEventListener('click', () => {
+            updateStatsScreen();
+            showScreen('stats');
+        });
+
+        buttons.statsBack.addEventListener('click', () => showScreen('mainMenu'));
+        buttons.rulesBack.addEventListener('click', () => showScreen('mainMenu'));
+        buttons.resetStats.addEventListener('click', resetStats);
+        themeSwitch.addEventListener('change', toggleTheme);
+        buttons.pause.addEventListener('click', () => { gameState.isPaused = true; showScreen('pause'); });
+        buttons.resume.addEventListener('click', () => { gameState.isPaused = false; showScreen('game'); });
+        buttons.restart.addEventListener('click', () => { gameState.isPaused = false; showScreen('game'); startLevel(); });
+        buttons.mainMenuPause.addEventListener('click', () => { gameState.isPaused = false; showScreen('mainMenu'); });
+        buttons.nextLevel.addEventListener('click', goToNextLevel);
+        buttons.hint.addEventListener('click', showHint);
+
+        gridContainer.addEventListener('mousedown', handleInteractionStart);
+        gridContainer.addEventListener('mousemove', handleInteractionMove);
+        window.addEventListener('mouseup', handleInteractionEnd);
+        gridContainer.addEventListener('touchstart', handleInteractionStart, { passive: false });
+        gridContainer.addEventListener('touchmove', handleInteractionMove, { passive: false });
+        window.addEventListener('touchend', handleInteractionEnd);
+
+        // --- Initialization ---
+        const savedTheme = localStorage.getItem('mathMatrixTheme');
+        applyTheme(savedTheme === 'light');
+        loadStats();
+        updateMainMenu();
+        showScreen('mainMenu');
+    });
     </script>
 </body>
 </html>
