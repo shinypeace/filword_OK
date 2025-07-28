@@ -2,40 +2,48 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Матрица Математики 4.0</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Матрица Математики 5.0</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/@vkontakte/vk-bridge/dist/browser.min.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg-primary: #111827; /* gray-900 */
-            --bg-secondary: #1f2937; /* gray-800 */
-            --bg-tertiary: #374151; /* gray-700 */
-            --bg-interactive: #0ea5e9; /* sky-500 */
-            --bg-interactive-hover: #0284c7; /* sky-600 */
+            --bg-primary: #111827;
+            --bg-secondary: #1f2937;
+            --bg-tertiary: #374151;
+            --bg-interactive: #0ea5e9;
+            --bg-interactive-hover: #0284c7;
             --text-primary: #ffffff;
-            --text-secondary: #9ca3af; /* gray-400 */
-            --text-accent: #38bdf8; /* sky-400 */
+            --text-secondary: #9ca3af;
+            --text-accent: #38bdf8;
             --modal-backdrop: rgba(0,0,0,0.7);
             --btn-restart-bg: var(--bg-tertiary);
             --btn-restart-text: var(--text-primary);
             --hint-color: #facc15; /* yellow-400 */
+            --hint-glow-color: rgba(250, 204, 21, 0.75);
         }
         
         html.light {
-            --bg-primary: #f3f4f6; /* gray-100 */
+            --bg-primary: #f3f4f6;
             --bg-secondary: #ffffff;
-            --bg-tertiary: #e5e7eb; /* gray-200 */
-            --bg-interactive: #3b82f6; /* blue-500 */
-            --bg-interactive-hover: #2563eb; /* blue-600 */
-            --text-primary: #1f2937; /* gray-800 */
-            --text-secondary: #6b7280; /* gray-500 */
-            --text-accent: #3b82f6; /* blue-500 */
+            --bg-tertiary: #e5e7eb;
+            --bg-interactive: #3b82f6;
+            --bg-interactive-hover: #2563eb;
+            --text-primary: #1f2937;
+            --text-secondary: #6b7280;
+            --text-accent: #3b82f6;
             --modal-backdrop: rgba(243, 244, 246, 0.7);
-            --btn-restart-bg: #d1d5db; /* gray-300 */
-            --btn-restart-text: #1f2937; /* gray-800 */
+            --btn-restart-bg: #d1d5db;
+            --btn-restart-text: #1f2937;
+        }
+
+        html, body {
+            height: 100%;
+            width: 100%;
+            overflow: hidden;
         }
 
         body {
@@ -46,6 +54,8 @@
             background-color: var(--bg-primary);
             color: var(--text-primary);
             transition: background-color 0.3s, color 0.3s;
+            padding-bottom: 50px; /* Space for banner ad */
+            box-sizing: border-box;
         }
         .screen {
             display: none;
@@ -53,7 +63,7 @@
             top: 0;
             left: 0;
             width: 100%;
-            height: 100%;
+            height: calc(100% - 50px); /* Adjust height for banner */
             animation: fadeIn 0.5s ease-in-out;
             background-color: var(--bg-primary);
         }
@@ -65,24 +75,29 @@
             to { opacity: 1; transform: scale(1); }
         }
         .tile {
-            transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s ease, background-color 0.2s;
+            transition: transform 0.2s, box-shadow 0.2s, background-color 0.2s;
             will-change: transform;
             background-color: var(--bg-secondary);
             color: var(--text-primary);
             box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -2px rgba(0,0,0,0.1);
+            font-size: clamp(1rem, 5vw, 2rem);
         }
         .tile.operator {
              background-color: var(--bg-interactive);
              color: white;
         }
         .tile.selected {
-            /* No more scaling */
             box-shadow: 0 0 25px var(--text-accent);
             z-index: 10;
         }
         .tile.hint-outline {
-            box-shadow: 0 0 0 4px var(--hint-color);
+            animation: hint-pulse 1.2s infinite;
             z-index: 20;
+        }
+        @keyframes hint-pulse {
+            0% { box-shadow: 0 0 0 0px var(--hint-glow-color), 0 0 0 0px var(--hint-glow-color); }
+            70% { box-shadow: 0 0 15px 8px transparent, 0 0 0 4px var(--hint-glow-color); }
+            100% { box-shadow: 0 0 0 15px transparent, 0 0 0 4px transparent; }
         }
         .modal-backdrop {
             background-color: var(--modal-backdrop);
@@ -112,32 +127,34 @@
              background-color: var(--btn-restart-bg);
              color: var(--btn-restart-text);
         }
-        .rules-illustration .tile { font-size: 1.25rem; }
+        .rules-illustration {
+            padding: 0.5rem; /* Prevents glow clipping */
+        }
         .menu-btn {
-            transition-property: background-color, border-color, transform, box-shadow;
+            transition-property: background-color, border-color, color, transform, box-shadow;
             transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-            transition-duration: 300ms;
+            transition-duration: 200ms;
         }
     </style>
 </head>
-<body class="overflow-hidden select-none">
+<body>
 
     <!-- Main Menu Screen -->
-    <div id="main-menu" class="screen active flex-col items-center justify-center p-8 space-y-8">
+    <div id="main-menu" class="screen active flex-col items-center justify-center p-4 space-y-6">
         <div class="text-center">
-            <h1 class="text-5xl md:text-6xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-sky-400 to-fuchsia-500">Матрица</h1>
-            <h2 class="text-5xl md:text-6xl font-black tracking-tighter" style="color: var(--text-primary);">Математики</h2>
+            <h1 class="font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-sky-400 to-fuchsia-500" style="font-size: clamp(2.5rem, 12vw, 4rem);">Матрица</h1>
+            <h2 class="font-black tracking-tighter" style="color: var(--text-primary); font-size: clamp(2.5rem, 12vw, 4rem);">Математики</h2>
         </div>
         
-        <div id="difficulty-selection" class="grid grid-cols-2 gap-4 w-full max-w-sm">
+        <div id="difficulty-selection" class="grid grid-cols-2 gap-3 w-full max-w-sm">
             <!-- Buttons are generated by JS -->
         </div>
 
-        <div class="flex flex-col space-y-4 w-full max-w-sm">
+        <div class="flex flex-col space-y-3 w-full max-w-sm">
              <button id="stats-button" class="w-full font-bold py-3 px-4 rounded-xl text-lg shadow-md transform hover:scale-105 menu-btn" style="background-color: var(--bg-tertiary); color: var(--text-primary);">
                 Статистика
             </button>
-            <div class="flex items-center justify-between p-3 rounded-xl" style="background-color: var(--bg-tertiary);">
+            <div class="flex items-center justify-between p-3 rounded-xl menu-btn" style="background-color: var(--bg-tertiary);">
                 <span class="font-medium" style="color: var(--text-secondary);">Светлая тема</span>
                 <input type="checkbox" id="theme-switch" class="theme-switcher">
             </div>
@@ -145,9 +162,9 @@
     </div>
 
     <!-- Game Screen -->
-    <div id="game-screen" class="screen flex-col items-center justify-between p-4">
+    <div id="game-screen" class="screen flex-col items-center justify-between p-2 sm:p-4">
         <!-- Header -->
-        <header class="w-full flex items-center justify-between p-2">
+        <header class="w-full flex items-center justify-between p-2 flex-shrink-0">
             <div class="text-left">
                 <div class="text-sm" style="color: var(--text-secondary);">УРОВЕНЬ</div>
                 <div id="level-display" class="text-2xl font-bold">1</div>
@@ -162,13 +179,13 @@
         </header>
 
         <!-- Game Grid -->
-        <main id="grid-container" class="relative w-full max-w-md aspect-square flex items-center justify-center">
+        <main id="grid-container" class="relative w-full max-w-md aspect-square flex items-center justify-center my-2">
             <div id="path-container"></div>
             <div id="grid" class="grid gap-2 p-2 w-full h-full"></div>
         </main>
 
         <!-- Footer -->
-        <footer class="w-full flex items-center justify-between p-2">
+        <footer class="w-full flex items-center justify-between p-2 flex-shrink-0">
             <button id="hint-button" class="flex items-center justify-center w-16 h-16 rounded-full bg-yellow-500 hover:bg-yellow-600 transition text-4xl">
                 💡
             </button>
@@ -180,7 +197,8 @@
         </footer>
     </div>
     
-    <!-- Pause Modal -->
+    <!-- Modals (Pause, Stats, Rules, Level Complete) -->
+    <!-- These modals are functionally the same as before, just placed here for brevity -->
     <div id="pause-modal" class="screen modal-backdrop flex-col items-center justify-center p-8">
         <div class="rounded-2xl p-8 shadow-2xl w-full max-w-xs text-center space-y-6" style="background-color: var(--bg-secondary);">
             <h3 class="text-3xl font-bold">Пауза</h3>
@@ -191,8 +209,6 @@
             </div>
         </div>
     </div>
-
-    <!-- Stats Screen -->
     <div id="stats-screen" class="screen flex-col items-center p-4 sm:p-8">
         <div class="w-full max-w-md h-full flex flex-col">
             <div class="relative text-center py-4 flex-shrink-0">
@@ -209,9 +225,7 @@
                             <th class="p-3 text-lg font-bold text-right">Уровней пройдено</th>
                         </tr>
                     </thead>
-                    <tbody id="stats-table-body">
-                        <!-- Rows generated by JS -->
-                    </tbody>
+                    <tbody id="stats-table-body"></tbody>
                 </table>
             </div>
             <div class="flex-shrink-0 mt-4">
@@ -219,8 +233,6 @@
             </div>
         </div>
     </div>
-
-    <!-- Rules Screen -->
     <div id="rules-screen" class="screen flex-col items-center p-4 sm:p-8">
         <div class="w-full max-w-md h-full flex flex-col">
             <div class="relative text-center py-4 flex-shrink-0">
@@ -231,23 +243,14 @@
             </div>
             <div class="flex-grow mt-4 space-y-6 text-left overflow-y-auto" style="color: var(--text-primary);">
                 <p class="text-lg leading-relaxed">Соединяйте <strong style="color: var(--text-accent);">числа</strong> и <strong style="color: var(--text-accent);">операторы</strong>, чтобы получить <strong style="color: var(--text-accent);">целевое значение</strong>.</p>
-                <p>1. Начните с любого числа.</p>
-                <p>2. Проведите пальцем или мышью к соседнему оператору, а затем к следующему числу.</p>
-                <p>3. Путь должен состоять как минимум из 3 ячеек (число → оператор → число).</p>
-                
                 <div class="rules-illustration">
                     <p class="mb-2 text-center w-full">Пример: получить <strong>15</strong></p>
-                    <div id="rules-grid" class="grid grid-cols-3 gap-2">
-                        <!-- Illustration cells generated by JS -->
-                    </div>
+                    <div id="rules-grid" class="grid grid-cols-3 gap-2"></div>
                 </div>
-
                  <p class="pt-4">Если застряли, нажмите кнопку подсказки 💡.</p>
             </div>
         </div>
     </div>
-
-    <!-- Level Complete Modal -->
     <div id="level-complete-modal" class="screen modal-backdrop flex-col items-center justify-center p-8">
         <div class="rounded-2xl p-8 shadow-2xl w-full max-w-xs text-center space-y-6 transform scale-0 transition-transform duration-500 ease-out" id="level-complete-content" style="background-color: var(--bg-secondary);">
             <div class="relative">
@@ -261,9 +264,11 @@
         </div>
     </div>
 
-
     <script>
     document.addEventListener('DOMContentLoaded', () => {
+        // --- VK BRIDGE ---
+        vkBridge.send('VKWebAppInit');
+
         // --- DOM Elements ---
         const screens = {
             mainMenu: document.getElementById('main-menu'),
@@ -307,6 +312,8 @@
             '8x8': { size: 8, unlock: 25, numRange: 50 },
         };
         const difficultyOrder = ['4x4', '5x5', '6x6', '7x7', '8x8'];
+        const SAVE_KEY = 'mathMatrixStats_v5';
+        const AD_FREQUENCY = 3;
 
         // --- Game State ---
         let gameState = {
@@ -322,38 +329,67 @@
             hintStep: 0,
         };
         let rulesAnimationTimer = null;
+        let isVK = false;
 
         // --- Stats State ---
         let gameStats = {};
+        let levelsSinceAd = 0;
 
         // --- Utility Functions ---
         const showScreen = (screenId) => {
             Object.values(screens).forEach(s => s.classList.remove('active'));
             if (screens[screenId]) screens[screenId].classList.add('active');
             
-            // Clear rules animation when leaving the screen
             if (screenId !== 'rules' && rulesAnimationTimer) {
                 clearTimeout(rulesAnimationTimer);
                 rulesAnimationTimer = null;
             }
         };
 
-        const saveStats = () => localStorage.setItem('mathMatrixStats_v4', JSON.stringify(gameStats));
-
-        const loadStats = () => {
-            const saved = localStorage.getItem('mathMatrixStats_v4');
-            if (saved) {
-                gameStats = JSON.parse(saved);
-                difficultyOrder.forEach(key => {
-                    if (!gameStats[key]) {
-                        gameStats[key] = { levelsCompleted: 0 };
-                    }
-                });
+        const saveStats = async () => {
+            const dataToSave = JSON.stringify(gameStats);
+            if (isVK) {
+                try {
+                    await vkBridge.send('VKWebAppStorageSet', { key: SAVE_KEY, value: dataToSave });
+                } catch (error) {
+                    console.error("VK Save Failed:", error);
+                }
             } else {
-                difficultyOrder.forEach(key => {
-                    gameStats[key] = { levelsCompleted: 0 };
-                });
+                localStorage.setItem(SAVE_KEY, dataToSave);
             }
+        };
+
+        const loadStats = async () => {
+            let loadedData = null;
+            try {
+                // First, try to detect if we are in VK environment
+                await vkBridge.send('VKWebAppGetUserInfo');
+                isVK = true;
+                const vkData = await vkBridge.send('VKWebAppStorageGet', { keys: [SAVE_KEY] });
+                if (vkData.keys[0].value) {
+                    loadedData = vkData.keys[0].value;
+                }
+            } catch (error) {
+                // Not in VK or error, fall back to localStorage
+                isVK = false;
+                console.log("Not in VK environment or failed to get user info, using localStorage.");
+                loadedData = localStorage.getItem(SAVE_KEY);
+            }
+
+            if (loadedData) {
+                gameStats = JSON.parse(loadedData);
+            }
+            
+            // Initialize stats for all difficulties if they don't exist
+            difficultyOrder.forEach(key => {
+                if (!gameStats[key]) {
+                    gameStats[key] = { levelsCompleted: 0 };
+                }
+            });
+             if (gameStats.levelsSinceAd === undefined) {
+                gameStats.levelsSinceAd = 0;
+            }
+            levelsSinceAd = gameStats.levelsSinceAd;
         };
 
         const resetStats = () => {
@@ -361,6 +397,8 @@
                 difficultyOrder.forEach(key => {
                     gameStats[key] = { levelsCompleted: 0 };
                 });
+                gameStats.levelsSinceAd = 0;
+                levelsSinceAd = 0;
                 saveStats();
                 updateMainMenu();
                 updateStatsScreen();
@@ -392,7 +430,7 @@
 
                 if(key === 'rules') {
                     button.id = 'rules-button';
-                    button.className += ' p-4 rounded-xl font-bold text-xl shadow-lg transform hover:scale-105';
+                    button.className += ' p-4 rounded-xl font-bold text-lg sm:text-xl shadow-lg transform hover:scale-105';
                     button.style.backgroundColor = 'var(--bg-tertiary)';
                     button.style.color = 'var(--text-primary)';
                     button.innerHTML = 'Правила';
@@ -406,12 +444,12 @@
                 const isUnlocked = previousDifficultyKey === null || gameStats[previousDifficultyKey].levelsCompleted >= config.unlock;
                 
                 if(isUnlocked) {
-                    button.className += ' p-4 rounded-xl text-white font-bold text-xl shadow-lg transform hover:scale-105';
+                    button.className += ' p-4 rounded-xl text-white font-bold text-lg sm:text-xl shadow-lg transform hover:scale-105';
                     button.style.backgroundColor = 'var(--bg-interactive)';
                     button.innerHTML = key;
                 } else {
                     button.disabled = true;
-                    button.className += ' p-4 rounded-xl font-bold text-xl shadow-md';
+                    button.className += ' p-4 rounded-xl font-bold text-lg sm:text-xl shadow-md';
                     button.style.backgroundColor = 'var(--bg-tertiary)';
                     button.style.color = 'var(--text-secondary)';
                     const completed = gameStats[previousDifficultyKey].levelsCompleted;
@@ -419,7 +457,7 @@
                     button.innerHTML = `
                         <div class="flex flex-col items-center justify-center">
                             <span>${key}</span>
-                            <div class="flex items-center text-sm font-medium mt-1">
+                            <div class="flex items-center text-xs font-medium mt-1">
                                 <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 1a4.5 4.5 0 00-4.5 4.5V9H5a2 2 0 00-2 2v6a2 2 0 002 2h10a2 2 0 002-2v-6a2 2 0 00-2-2h-.5V5.5A4.5 4.5 0 0010 1zm3 8V5.5a3 3 0 10-6 0V9h6z" clip-rule="evenodd"></path></svg>
                                 <span>${completed}/${needed}</span>
                             </div>
@@ -493,6 +531,7 @@
         }
 
         // --- Level Generation ---
+        // This logic remains the same as v4.0 as it's solid.
         const generateLevel = () => {
             const config = difficulties[gameState.difficulty];
             const size = config.size;
@@ -614,7 +653,7 @@
                     tile.dataset.value = cell.value;
                     tile.dataset.type = cell.type;
                     
-                    let tileClasses = 'tile w-full h-full flex items-center justify-center rounded-lg text-xl md:text-2xl font-bold cursor-pointer';
+                    let tileClasses = 'tile w-full h-full flex items-center justify-center rounded-lg font-bold cursor-pointer';
                     if (cell.type === 'operator') {
                         tileClasses += ' operator';
                         tile.innerHTML = cell.value === '*' ? '&times;' : cell.value.replace('-', '−');
@@ -681,8 +720,20 @@
 
         const levelComplete = () => {
             gameStats[gameState.difficulty].levelsCompleted++;
+            levelsSinceAd++;
+            gameStats.levelsSinceAd = levelsSinceAd;
             saveStats();
             updateMainMenu();
+            
+            if (isVK && levelsSinceAd >= AD_FREQUENCY) {
+                vkBridge.send('VKWebAppShowNativeAds', { ad_format: 'interstitial' })
+                    .then(() => levelsSinceAd = 0)
+                    .catch(e => console.log("Interstitial ad error", e))
+                    .finally(() => {
+                        gameStats.levelsSinceAd = levelsSinceAd;
+                        saveStats();
+                    });
+            }
             
             displays.completedLevelNum.textContent = gameStats[gameState.difficulty].levelsCompleted;
             showScreen('levelComplete');
@@ -693,7 +744,6 @@
         const goToNextLevel = () => {
              levelCompleteContent.classList.remove('scale-100');
              levelCompleteContent.classList.add('scale-0');
-             // Use a short timeout to allow the fade-out animation to play
              setTimeout(() => {
                 showScreen('game');
                 startLevel();
@@ -702,7 +752,7 @@
 
         const resetPath = () => {
             gameState.isDrawing = false;
-            gameState.hintStep = 0;
+            // gameState.hintStep is NOT reset here intentionally
             gameState.currentPath = [];
             gameState.currentValue = 0;
             document.querySelectorAll('.tile.selected').forEach(t => t.classList.remove('selected'));
@@ -711,6 +761,7 @@
             updateDisplay();
         };
 
+        // Interaction logic (mousedown, mousemove, etc.) remains the same as v4.0
         const handleInteractionStart = (e) => {
             if (gameState.isPaused) return;
             const tile = e.target.closest('.tile');
@@ -776,25 +827,46 @@
             }
         };
 
-        const showHint = () => {
+
+        const handleHintClick = () => {
+            if (!isVK) {
+                // For local testing without VK
+                grantHint();
+                return;
+            }
+            vkBridge.send('VKWebAppShowNativeAds', { ad_format: 'reward' })
+                .then(data => {
+                    if (data.result) {
+                        grantHint();
+                    }
+                })
+                .catch(error => console.log("Reward ad error", error));
+        };
+
+        const grantHint = () => {
             if (gameState.isDrawing) return;
             
-            // Clear previous hints
             document.querySelectorAll('.tile.hint-outline').forEach(t => t.classList.remove('hint-outline'));
 
             gameState.hintStep++;
-            const tilesToShow = 1 + (gameState.hintStep * 2);
+            // New logic: 1st click = 2 tiles, 2nd = 4, etc.
+            const tilesToShow = gameState.hintStep * 2;
 
             if (tilesToShow > gameState.solutionPath.length) {
-                gameState.hintStep = 0; // Reset if we've shown the whole path
+                gameState.hintStep = 1; // Reset to first step
             }
+            
+            const finalIndex = Math.min(gameState.hintStep * 2, gameState.solutionPath.length);
 
-            for(let i=0; i < tilesToShow && i < gameState.solutionPath.length; i++) {
-                const tileInfo = gameState.solutionPath[i];
-                const tileElement = document.querySelector(`[data-row='${tileInfo.row}'][data-col='${tileInfo.col}']`);
-                if (tileElement) {
-                   tileElement.classList.add('hint-outline');
-                }
+            for(let i=0; i < finalIndex; i++) {
+                const delay = i * 100; // Stagger animation
+                setTimeout(() => {
+                    const tileInfo = gameState.solutionPath[i];
+                    const tileElement = document.querySelector(`[data-row='${tileInfo.row}'][data-col='${tileInfo.col}']`);
+                    if (tileElement) {
+                       tileElement.classList.add('hint-outline');
+                    }
+                }, delay);
             }
         };
 
@@ -810,11 +882,7 @@
             }
         });
 
-        buttons.stats.addEventListener('click', () => {
-            updateStatsScreen();
-            showScreen('stats');
-        });
-
+        buttons.stats.addEventListener('click', () => { updateStatsScreen(); showScreen('stats'); });
         buttons.statsBack.addEventListener('click', () => showScreen('mainMenu'));
         buttons.rulesBack.addEventListener('click', () => showScreen('mainMenu'));
         buttons.resetStats.addEventListener('click', resetStats);
@@ -824,7 +892,7 @@
         buttons.restart.addEventListener('click', () => { gameState.isPaused = false; showScreen('game'); startLevel(); });
         buttons.mainMenuPause.addEventListener('click', () => { gameState.isPaused = false; showScreen('mainMenu'); });
         buttons.nextLevel.addEventListener('click', goToNextLevel);
-        buttons.hint.addEventListener('click', showHint);
+        buttons.hint.addEventListener('click', handleHintClick);
 
         gridContainer.addEventListener('mousedown', handleInteractionStart);
         gridContainer.addEventListener('mousemove', handleInteractionMove);
@@ -834,11 +902,19 @@
         window.addEventListener('touchend', handleInteractionEnd);
 
         // --- Initialization ---
-        const savedTheme = localStorage.getItem('mathMatrixTheme');
-        applyTheme(savedTheme === 'light');
-        loadStats();
-        updateMainMenu();
-        showScreen('mainMenu');
+        async function init() {
+            const savedTheme = localStorage.getItem('mathMatrixTheme');
+            applyTheme(savedTheme === 'light');
+            await loadStats();
+            updateMainMenu();
+            showScreen('mainMenu');
+            if (isVK) {
+                vkBridge.send('VKWebAppShowBannerAd', { banner_location: 'bottom' })
+                    .catch(e => console.log("Banner ad error", e));
+            }
+        }
+
+        init();
     });
     </script>
 </body>
